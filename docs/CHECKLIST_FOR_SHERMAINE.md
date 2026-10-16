@@ -2,8 +2,14 @@
 
 Deadline: **Oct 30, 10:00 PDT = Oct 31, 01:00 Malaysia time.** Aim to submit on **Oct 29**.
 
-Everything else is done: code on GitHub, live demo on Render, Telegram bot live, 300-message
-evaluation run on real Nemotron, OpenShell sandbox verified, Devpost draft filled up to the Submit page.
+Everything else is done: code on GitHub (14 tests), live demo on Render, Telegram bot live, 300-message
+evaluation + 3× memory test on real Nemotron, OpenShell sandbox verified, Devpost draft filled up to the
+Submit page (story, tags, links, 6 captioned images, 16 factual answers).
+
+**Try these on the live demo / bot before recording:**
+- `Salam Puan Aminah. Platform pelaburan RRJ Pro tawarkan pulangan 30% sebulan DIJAMIN. Modal minima RM5,000. WhatsApp 011-9999 0123.` → high, cites the SC alert list
+- `Mak, Siti ni. Nombor baru 011-9999 0461, phone lama hilang. Tolong transfer RM900 ke akaun 5566778899001.` → high, "claims to be Siti but …"
+- `Puan, ini Faizal dari Prudential. Premium polis puan jatuh tempo 20 Okt, boleh saya call esok pagi untuk sahkan? 012-345 6789` → low, known agent
 
 ## 1. Record the video (≈ 1–2 hours)
 - Script: `docs/VIDEO_SCRIPT.md` (timings + lines, numbers already filled in).
@@ -30,10 +36,11 @@ Open devpost.com → My projects → *Jaga: a scam guardian that verifies before
 - Token Factory: $25 balance; the build and all evaluations used roughly $7 (the usage page lags by
   several hours). Check it once in December. A full re-run of the evaluation costs about $3.
 - The free Render instance sleeps when idle; the first visit takes ~50 s. That's fine for judges.
+- Render does **not** auto-deploy on push. After any code change: dashboard.render.com → jaga →
+  **Manual Deploy → Deploy latest commit**.
 - Tavily: 3,184 of 9,000 credits used on 16 Oct (≈ 5,800 left).
 
 ## 4. Housekeeping
-- Delete `NEBIUS X NVIDIA/jaga_sync.tgz` — it contains a copy of your `.env` keys.
 - The GitHub access token `jaga-hackathon-push` (expires Nov 15) is no longer needed; you can
   revoke it at github.com/settings/personal-access-tokens.
 - Optional: ask 2–3 seniors or family members to try the Telegram bot and add one real quote to the README.
