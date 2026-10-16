@@ -1,0 +1,28 @@
+# Render Blueprint — one-click deploy of the Jaga dashboard (+ Telegram gateway if a token is set).
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: jaga
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NEBIUS_API_KEY
+        sync: false          # you paste this once in the Render form
+      - key: TAVILY_API_KEY
+        sync: false          # you paste this once in the Render form
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false          # optional
+      - key: JAGA_MODEL_FAST
+        value: nvidia/Nemotron-3_5-Lightning,nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B
+      - key: JAGA_MODEL_PLAN
+        value: nvidia/nemotron-3-super-120b-a12b,nvidia/Nemotron-3_5-Lightning
+      - key: JAGA_MODEL_ESCALATE
+        value: nvidia/Nemotron-3-Ultra-550b-a55b,nvidia/nemotron-3-super-120b-a12b
+      - key: JAGA_MODEL_VISION
+        value: nvidia/Nemotron-3.5-Super-VL
+      - key: JAGA_RATE_LIMIT
+        value: "10"
