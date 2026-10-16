@@ -101,4 +101,6 @@ def poll_forever() -> None:
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
+    # httpx logs full request URLs at INFO, and Telegram URLs contain the bot token.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
     poll_forever()

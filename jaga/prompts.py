@@ -66,6 +66,10 @@ Hard rules:
 - risk=medium for scam-pattern messages with no official hit.
 - risk=low for legitimate patterns with no hits, or trusted-contact matches.
 - risk=unknown if the message is ambiguous and there is nothing to verify.
+- Household-memory novelty flags are context, not proof: never raise risk on novelty alone.
+  Legitimate bills, delivery notices and bank alerts often come from organisations the household
+  never recorded. A genuine bank or courier message that tells the reader NOT to share a TAC, or
+  to use the official app, is legit.
 - escalate=true only when money is involved AND the evidence is conflicting or absent AND risk is
   medium/unknown — this sends the case to Nemotron 3 Ultra for a second opinion.
 - notify_family=true for high and medium.

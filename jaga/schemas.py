@@ -44,10 +44,10 @@ class Triage(BaseModel):
 
 
 class Check(BaseModel):
-    entity: str
+    entity: str = Field(max_length=120)
     tool: Literal["tavily_search_official", "tavily_search_news", "ledger_lookup", "alert_cache"]
-    query: str
-    reason: str
+    query: str = Field(max_length=160, description="Short web search query, under 12 words")
+    reason: str = Field(max_length=200)
 
 
 class VerificationPlan(BaseModel):

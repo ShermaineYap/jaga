@@ -179,7 +179,7 @@ class Jaga:
         slim_results = [{k: v for k, v in r.items() if k != "results"} | {"top_results": r.get("results", [])[:2]}
                         for r in tool_results]
         verdict: Verdict = self.tf.structured(
-            "plan", VERDICT_SYSTEM, VERDICT_USER.format(
+            "fast" if opts.tier == "fast" else "plan", VERDICT_SYSTEM, VERDICT_USER.format(
                 triage_json=triage.model_dump_json(indent=1),
                 plan_json=plan.model_dump_json(indent=1) if plan else "(fast tier: no plan)",
                 results_json=json.dumps(slim_results, indent=1, default=str),

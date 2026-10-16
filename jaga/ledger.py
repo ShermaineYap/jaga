@@ -145,12 +145,19 @@ class Ledger:
             if a not in known_accts:
                 flags.append(f"payee account {a} never seen before")
         known_phones = {c["phone"] for c in contacts}
-        for p in phones:
-            if p not in known_phones:
-                flags.append(f"first message from {p}")
-        for o in triage.entities.orgs:
-            if o.lower() not in {c["org"].lower() for c in contacts if c["org"]}:
-                flags.append(f"{o} is not a known household relationship")
+        if triage.family != "legit":
+            for p in phones:
+                if p not in known_phones:
+                    flags.append(f"first message from {p}")
+        # An unknown organisation only matters when the message also gives a way to pay or
+        # contact it (number, link, account). Ordinary bills and notices name organisations
+        # the household never recorded, and flagging those raised false positives in eval.
+        has_channel = bool(triage.entities.phones or triage.entities.urls or triage.entities.bank_accounts)
+        if has_channel and triage.family != "legit":
+            known_orgs = {c["org"].lower() for c in contacts if c["org"]}
+            for o in triage.entities.orgs:
+                if o.lower() not in known_orgs:
+                    flags.append(f"{o} is not a known household relationship")
         recent = self.recent_cases(household_id, limit=5)
         return {"trusted_matches": trusted, "novelty_flags": flags[:5],
                 "recent_families": [r["family"] for r in recent],
