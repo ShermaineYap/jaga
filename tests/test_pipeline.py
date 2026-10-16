@@ -110,3 +110,19 @@ def test_misattributed_web_evidence_is_dropped():
     assert "https://bnm.gov.my/x" not in urls
     assert "https://sc.com.my/a" in urls
     assert "997" in v.recommended_action
+
+
+def test_name_from_new_number_is_not_trusted():
+    """'Mum, it's Siti, new number' must not be cleared by household memory."""
+    j = make()
+    j.ledger.add_contact(HH, "Siti", "013-222 3344", "", "daughter")
+    from jaga.schemas import Entities, Triage
+    tri = Triage(family="impersonation", confidence=0.9, language="en", urgency_cues=[], asks_for=["transfer"],
+                 entities=Entities(phones=["011-9999 0461"], persons=["Siti"], bank_accounts=["5566778899001"]),
+                 one_line="Siti asks for RM900 from a new number")
+    ctx = j.ledger.context_for(HH, tri)
+    assert ctx["trusted_matches"] == []
+    assert any("claims to be Siti" in f for f in ctx["novelty_flags"])
+    real = tri.model_copy(deep=True)
+    real.entities.phones = ["013-222 3344"]
+    assert j.ledger.context_for(HH, real)["trusted_matches"]

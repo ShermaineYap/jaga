@@ -138,11 +138,22 @@ class Ledger:
         orgs = {o.lower() for o in triage.entities.orgs}
         persons = {p.lower() for p in triage.entities.persons}
         trusted, flags = [], []
+        # Trust is earned by the saved PHONE NUMBER, never by a name or organisation the
+        # sender types — "Mum, it's Siti, new number" is the most common impersonation
+        # script, and in evaluation a name-only match cleared exactly that scam.
+        text_l = " ".join([triage.one_line] + triage.entities.persons + triage.entities.orgs).lower()
         for c in contacts:
-            if c["trusted"] and ((c["phone"] and c["phone"] in phones) or
-                                 (c["org"] and c["org"].lower() in orgs) or
-                                 (c["name"] and c["name"].lower() in persons)):
-                trusted.append(f"{c['name']} ({c['relation'] or c['org']})")
+            if not c["trusted"]:
+                continue
+            label = f"{c['name']} ({c['relation'] or c['org']})"
+            first = (c["name"] or "").lower().replace("encik ", "").replace("puan ", "").replace("dr ", "").split(" ")[0]
+            claims = bool(first and len(first) >= 3 and first in text_l) or bool(c["org"] and c["org"].lower() in orgs)
+            if c["phone"] and c["phone"] in phones:
+                trusted.append(label)
+            elif claims and phones:
+                flags.append(f"claims to be {c['name']} but uses a number not saved for them")
+            elif claims and (triage.entities.bank_accounts or triage.asks_for):
+                flags.append(f"claims to be {c['name']} without their saved number")
         known_accts = {p["account"] for p in payees}
         for a in triage.entities.bank_accounts:
             if a not in known_accts:
