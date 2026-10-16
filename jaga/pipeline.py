@@ -54,6 +54,22 @@ def _backstop_entities(triage: Triage, text: str) -> None:
             e.bank_accounts.append(a)
 
 
+def _concrete_entity(chk, triage: Triage) -> str | None:
+    import re as _re
+    e = triage.entities
+    pool = [x for x in (e.phones + e.urls + e.orgs + e.bank_accounts + e.persons) if x and len(x.strip()) >= 3]
+    norm = lambda x: _re.sub(r"[\s\-+\"'()]", "", x.lower())
+    want = norm(chk.entity)
+    for x in pool:
+        if norm(x) == want:
+            return x
+    q = norm(chk.query)
+    for x in sorted(pool, key=len, reverse=True):
+        if norm(x) and norm(x) in q:
+            return x
+    return None
+
+
 def _plan_floor(plan: VerificationPlan, triage: Triage) -> None:
     """If the message looks like a scam and names something checkable, at least one official
     lookup per named org / phone / link happens — even if the planner chose none."""
@@ -98,13 +114,25 @@ def _enforce_policy(verdict: Verdict, ledger_ctx: dict, tool_results: list[dict]
     if not verdict.evidence:
         verdict.evidence.append(Evidence(claim="No official alert found for the names, numbers or links in this message",
                                          source_url="", quote="", kind="none_found"))
-    # 5. High risk always points to the National Scam Response Centre.
-    if verdict.risk == "high" and "997" not in verdict.recommended_action:
-        verdict.recommended_action = verdict.recommended_action.rstrip(". ") + ". Jika wang sudah dihantar, hubungi NSRC 997 segera / If money was sent, call NSRC 997 now."
     # 6. Never say "safe".
     for f in ("headline_ms", "headline_en", "explanation"):
         val = getattr(verdict, f)
         setattr(verdict, f, val.replace(" is safe", " has no official alert").replace("selamat untuk", "tiada amaran rasmi untuk"))
+    # 7. A headline may only claim a list match if a tool verified one.
+    if not any(e.kind in ("official_alert", "news") for e in verdict.evidence):
+        list_words = ("senarai", "disenarai", "list", "listed", "amaran sc", "amaran rasmi", "semak mule")
+        for f in ("headline_ms", "headline_en"):
+            if any(w in getattr(verdict, f).lower() for w in list_words):
+                setattr(verdict, f, "")
+    actions = {"high": "Jangan hantar wang atau kongsi TAC. / Do not transfer money or share any code.",
+               "medium": "Berhenti dan sahkan dengan keluarga dahulu. / Pause and check with family first.",
+               "low": "Tiada amaran rasmi ditemui; teruskan dengan berhati-hati. / No official alert found; proceed with normal care.",
+               "unknown": "Tanya keluarga sebelum bertindak. / Ask family before acting."}
+    if len(verdict.recommended_action.strip(" .")) < 8:
+        verdict.recommended_action = actions.get(verdict.risk, actions["unknown"])
+    if not verdict.explanation.strip():
+        bits = [e.claim for e in verdict.evidence[:2]] + list(ledger_ctx.get("novelty_flags", []))[:2]
+        verdict.explanation = "; ".join(bits) or "No further detail."
     defaults = {"high": ("Amaran: mesej ini kelihatan seperti penipuan.", "Warning: this looks like a scam."),
                 "medium": ("Berhati-hati: ada tanda-tanda penipuan.", "Caution: this message has scam signals."),
                 "low": ("Tiada amaran rasmi ditemui untuk mesej ini.", "No official alert found for this message."),
@@ -113,6 +141,9 @@ def _enforce_policy(verdict: Verdict, ledger_ctx: dict, tool_results: list[dict]
         verdict.headline_ms = defaults[verdict.risk][0]
     if not verdict.headline_en.strip():
         verdict.headline_en = defaults[verdict.risk][1]
+    # 5. High risk always points to the National Scam Response Centre.
+    if verdict.risk == "high" and "997" not in verdict.recommended_action:
+        verdict.recommended_action = verdict.recommended_action.rstrip(". ") + ". Jika wang sudah dihantar, hubungi NSRC 997 segera / If money was sent, call NSRC 997 now."
     # A message we flag cannot also be labelled "legit".
     if verdict.risk in ("high", "medium") and verdict.family == "legit":
         verdict.family = "impersonation"
@@ -163,7 +194,12 @@ class Jaga:
                 for chk in plan.checks[: config.MAX_TOOL_ROUNDS * 2]:
                     chk.query = _re.sub(r"\s+", " ", chk.query).strip().strip('"')[:200] or chk.entity
                     chk.entity = _re.sub(r"\s+", " ", chk.entity).strip()[:120]
-                    if chk.entity and chk.query and len(chk.query) >= 3:
+                    # Only concrete extracted entities may be verified. A generic word ("phone",
+                    # "bank") once matched an unrelated SC page in live testing. Re-map the check to
+                    # the real entity named in its query, or drop it.
+                    ent = _concrete_entity(chk, triage)
+                    if ent and chk.query and len(chk.query) >= 3:
+                        chk.entity = ent
                         checks.append(chk)
 
                 def _run(chk):

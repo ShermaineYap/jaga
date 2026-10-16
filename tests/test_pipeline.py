@@ -126,3 +126,24 @@ def test_name_from_new_number_is_not_trusted():
     real = tri.model_copy(deep=True)
     real.entities.phones = ["013-222 3344"]
     assert j.ledger.context_for(HH, real)["trusted_matches"]
+
+
+def test_generic_word_is_not_a_verifiable_entity():
+    """A check on the word 'phone' must be re-mapped to the real number or dropped."""
+    from jaga.pipeline import _concrete_entity
+    from jaga.schemas import Check, Entities, Triage
+    tri = Triage(family="mule", confidence=0.9, language="ms", urgency_cues=[], asks_for=[],
+                 entities=Entities(phones=["011-9999 0461"], bank_accounts=["5566778899001"]), one_line="x")
+    assert _concrete_entity(Check(entity="phone", tool="tavily_search_official", query="011-9999 0461 semak mule", reason=""), tri) == "011-9999 0461"
+    assert _concrete_entity(Check(entity="phone", tool="tavily_search_official", query="phone scam", reason=""), tri) is None
+
+
+def test_headline_cannot_claim_unverified_list_match():
+    from jaga.pipeline import _enforce_policy
+    from jaga.schemas import Verdict
+    v = Verdict(risk="high", family="mule", headline_ms="Nombor ini dalam senarai penipuan", headline_en="Number appears on scam list",
+                explanation="", evidence=[], recommended_action="", notify_family=True, escalate=False)
+    _enforce_policy(v, {"trusted_matches": [], "novelty_flags": ["first message from 011"]}, [])
+    assert "senarai" not in v.headline_ms.lower() and "list" not in v.headline_en.lower()
+    assert v.recommended_action.startswith("Jangan") and "997" in v.recommended_action
+    assert v.explanation
