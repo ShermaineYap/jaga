@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Apa yang Jaga ingat / What Jaga remembers</h1>
+<p class="muted">Structured memory, written deterministically after every case — not a text file the model decides to update. Two subjects are first-class: the protected person and their guardians.</p>
+<div class="card"><h2>Ahli isi rumah / Household</h2>
+<table><tr><th>Name</th><th>Role</th><th>Notification policy</th></tr>
+{% for m in members %}<tr><td>{{ m.name }}</td><td>{{ m.role }}</td><td>{{ m.notify_policy }}</td></tr>{% endfor %}</table></div>
+
+<div class="card"><h2>Kenalan dipercayai / Trusted contacts</h2>
+<table><tr><th>Name</th><th>Phone</th><th>Org / relation</th><th>Seen</th><th>Trusted</th></tr>
+{% for c in contacts %}<tr><td>{{ c.name or '—' }}</td><td>{{ c.phone }}</td><td>{{ c.org }} {{ c.relation }}</td><td>{{ c.times_seen }}×</td><td>{{ '✅' if c.trusted else '❔ unknown sender' }}</td></tr>{% endfor %}</table>
+<form method="post" action="/memory/trust" class="row" style="margin-top:12px">
+  <input name="name" placeholder="Name (e.g. Encik Faizal)" required style="max-width:220px">
+  <input name="phone" placeholder="Phone" style="max-width:160px">
+  <input name="org" placeholder="Org (e.g. Prudential)" style="max-width:180px">
+  <input name="relation" placeholder="Relation (insurance agent)" style="max-width:200px">
+  <button type="submit">Add trusted contact</button></form></div>
+
+<div class="card"><h2>Penerima bayaran dilihat / Payees seen</h2>
+<table><tr><th>Account</th><th>Label</th><th>Seen</th><th>Trusted</th></tr>
+{% for p in payees %}<tr><td><code>{{ p.account }}</code></td><td>{{ p.label or '—' }}</td><td>{{ p.times_seen }}×</td><td>{{ '✅' if p.trusted else '—' }}</td></tr>{% endfor %}
+{% if not payees %}<tr><td colspan="4" class="muted">None yet.</td></tr>{% endif %}</table></div>
+
+<div class="card"><h2>Data anda / Your data</h2>
+<div class="row"><a class="btn" href="/export">Export everything (JSON)</a>
+<form method="post" action="/delete-all" onsubmit="return confirm('Delete all household data?')"><button class="danger">Delete all</button></form></div></div>
+{% endblock %}

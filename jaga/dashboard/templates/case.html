@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Jaga · case {{ c.id }}{% endblock %}
+{% block content %}
+<a href="/" class="muted">← back</a>
+<div class="card {{ c.risk }}">
+  <div class="row"><span class="risk {{ c.risk }}">{{ c.risk }}</span><span class="pill">{{ c.family }}</span>
+    {% if c.notified %}<span class="pill">👪 family notified (summary only)</span>{% endif %}
+    {% if c.escalation %}<span class="pill">⚖️ second opinion: Nemotron 3 Ultra</span>{% endif %}</div>
+  <h1>{{ c.verdict.headline_ms }}</h1>
+  <div class="big muted" style="font-weight:500">{{ c.verdict.headline_en }}</div>
+  <p>{{ c.verdict.explanation }}</p>
+  <p class="big">➡️ {{ c.verdict.recommended_action }}</p>
+  <h3>Bukti / Evidence</h3>
+  <ul class="ev">{% for e in c.verdict.evidence %}
+    <li><b>{{ loop.index }}.</b> {{ e.claim }} <span class="pill">{{ e.kind }}</span>
+      {% if e.source_url %}<br><a href="{{ e.source_url }}" rel="noopener" target="_blank">{{ e.source_url }}</a>{% endif %}
+      {% if e.quote %}<br><span class="muted">“{{ e.quote }}”</span>{% endif %}</li>
+  {% endfor %}</ul>
+  {% if c.verdict.novelty_flags %}<h3>Ingatan isi rumah / Household memory</h3>
+  {% for f in c.verdict.novelty_flags %}<span class="pill">🧠 {{ f }}</span>{% endfor %}{% endif %}
+</div>
+
+<div class="card">
+  <h3>Mesej asal (kekal di sini, tidak dihantar kepada keluarga) / Original message (stays here)</h3>
+  <pre>{{ c.text }}</pre>
+</div>
+
+<div class="card">
+  <h3>Bagaimana Jaga membuat keputusan / How Jaga decided</h3>
+  <table>
+    <tr><th>Step</th><th>Model</th><th>Output</th></tr>
+    <tr><td>1. Triage</td><td><code>{{ c.models.fast if c.models else '' }}</code></td>
+        <td>{{ c.triage.family }} ({{ c.triage.confidence }}), lang={{ c.triage.language }}; asks for: {{ c.triage.asks_for|join(', ') }}
+        {% if c.triage.urgency_cues %}<br>urgency: {% for u in c.triage.urgency_cues %}<span class="pill">{{ u }}</span>{% endfor %}{% endif %}
+        <br>entities: {% for k, v in c.triage.entities.items() %}{% if v %}<span class="pill">{{ k }}: {{ v|join(', ') }}</span>{% endif %}{% endfor %}</td></tr>
+    {% if c.plan %}<tr><td>2. Verification plan</td><td><code>{{ c.models.plan if c.models else '' }}</code></td>
+        <td>{{ c.plan.rationale }}{% if c.plan.ledger_answers_it %} <span class="pill">answered by household memory</span>{% endif %}
+        <ul class="ev">{% for k in c.plan.checks %}<li><code>{{ k.tool }}</code> “{{ k.query }}” — <span class="muted">{{ k.reason }}</span></li>{% endfor %}</ul></td></tr>{% endif %}
+    <tr><td>3. Verdict</td><td><code>{{ c.models.plan if c.models else '' }}</code></td><td>risk={{ c.risk }}, notify_family={{ c.verdict.notify_family }}, escalate={{ c.verdict.escalate }}</td></tr>
+    {% if c.escalation %}<tr><td>4. Second opinion</td><td><code>{{ c.models.escalate }}</code></td><td>{{ c.escalation.reasoning_summary }} (agree={{ c.escalation.agree_with_verdict }})</td></tr>{% endif %}
+  </table>
+  <p class="muted">Cost ${{ '%.5f'|format(c.cost_usd or 0) }} · {{ c.latency_ms }} ms · tool calls: {{ c.tool_calls|length if c.tool_calls else 0 }}</p>
+  <details><summary>Raw JSON</summary><pre>{{ c.verdict|tojson(indent=1) }}</pre></details>
+</div>
+{% endblock %}

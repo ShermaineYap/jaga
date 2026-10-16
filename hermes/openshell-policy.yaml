@@ -1,0 +1,45 @@
+# NVIDIA OpenShell sandbox policy for Jaga.
+# Default-deny: the agent process can reach exactly three hosts. API keys are
+# never inside the sandbox — OpenShell's inference routing injects them at the
+# gateway, so a prompt-injected message cannot exfiltrate credentials.
+#
+# Apply:  openshell policy apply hermes/openshell-policy.yaml --sandbox jaga
+# (Check `openshell policy --help` for the exact subcommand on your version;
+#  the schema below follows the OpenShell 0.1.x docs — adjust field names if
+#  your version differs and note it in FEEDBACK.md.)
+apiVersion: openshell.nvidia.com/v1
+kind: SandboxPolicy
+metadata:
+  name: jaga
+spec:
+  network:
+    defaultAction: deny
+    egress:
+      - host: api.tokenfactory.nebius.com   # NVIDIA Nemotron inference on Nebius Token Factory
+        ports: [443]
+        purpose: inference
+      - host: api.tavily.com                # verification against official alert lists
+        ports: [443]
+        purpose: tool
+      - host: api.telegram.org              # senior + guardian messaging
+        ports: [443]
+        purpose: gateway
+  inference:
+    # Hermes talks to https://inference.local/v1; OpenShell forwards to Token
+    # Factory and attaches the key. The sandbox never holds NEBIUS_API_KEY.
+    provider: openai-compatible
+    baseURL: https://api.tokenfactory.nebius.com/v1
+    credentialRef: nebius-token-factory
+    allowedModels:
+      - nvidia/Nemotron-3_5-Lightning
+      - nvidia/nemotron-3-super-120b-a12b
+      - nvidia/Nemotron-3-Ultra-550b-a55b
+  filesystem:
+    readOnly: true
+    writable:
+      - /data            # jaga.sqlite3 (household ledger) — the only persistent state
+      - /home/agent/.hermes
+  audit:
+    format: ocsf
+    export: /data/audit/openshell-ocsf.jsonl
+    events: [network, process, inference, filesystem]

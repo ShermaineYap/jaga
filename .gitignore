@@ -1,0 +1,10 @@
+.env
+data/
+*.sqlite3
+__pycache__/
+*.pyc
+.pytest_cache/
+eval/results/results_*.json
+eval/results/batch_*.jsonl
+.DS_Store
+docs/demo_assets/*.mp4

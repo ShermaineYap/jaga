@@ -1,0 +1,15 @@
+services:
+  dashboard:
+    build: .
+    env_file: .env
+    ports: ["8000:7860"]
+    volumes: ["./data:/app/data"]
+    restart: unless-stopped
+  # Nightly alert-list refresh (Tavily Map → Extract into the local cache).
+  # In the OpenShell deployment Hermes cron does this instead (see hermes/SKILL.md).
+  alert-refresh:
+    build: .
+    env_file: .env
+    volumes: ["./data:/app/data"]
+    command: ["sh", "-c", "while true; do python -c 'from jaga.tavily_tools import Tavily; print(Tavily().refresh_alert_cache())'; sleep 86400; done"]
+    restart: unless-stopped

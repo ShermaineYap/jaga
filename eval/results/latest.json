@@ -1,0 +1,434 @@
+{
+ "results": [
+  {
+   "n": 30,
+   "tp": 11,
+   "fp": 1,
+   "fn": 4,
+   "tn": 14,
+   "precision": 0.917,
+   "recall": 0.733,
+   "f1": 0.815,
+   "false_positive_rate": 0.067,
+   "fpr_hard_negatives": 0.167,
+   "fpr_easy_negatives": 0.0,
+   "family_accuracy_on_scams": 0.667,
+   "recall_by_family": {
+    "impersonation": 1.0,
+    "investment": 1.0,
+    "love": 0.667,
+    "mule": 0.0,
+    "parcel": 0.5,
+    "phishing_otp": 1.0
+   },
+   "f1_by_language": {
+    "en": 0.5,
+    "manglish": 0.857,
+    "ms": 0.889
+   },
+   "median_latency_ms": 3,
+   "p90_latency_ms": 3,
+   "cost_usd_total": 0.0091,
+   "cost_usd_per_1000": 0.3,
+   "escalations": 0,
+   "tool_hits": 0,
+   "config": "rules",
+   "mock": true,
+   "errors": 0
+  }
+ ],
+ "predictions": {
+  "rules": [
+   {
+    "id": "sb-0001",
+    "risk": "high",
+    "family": "impersonation",
+    "latency_ms": 9,
+    "cost_usd": 0.000305,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0002",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000302,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0003",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000302,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0004",
+    "risk": "high",
+    "family": "impersonation",
+    "latency_ms": 3,
+    "cost_usd": 0.000305,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0005",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000303,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0006",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000302,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0007",
+    "risk": "medium",
+    "family": "love",
+    "latency_ms": 3,
+    "cost_usd": 0.000304,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0008",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000303,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0009",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000303,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0010",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000301,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0011",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000301,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0012",
+    "risk": "high",
+    "family": "phishing_otp",
+    "latency_ms": 3,
+    "cost_usd": 0.000309,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0013",
+    "risk": "high",
+    "family": "phishing_otp",
+    "latency_ms": 3,
+    "cost_usd": 0.000307,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0014",
+    "risk": "high",
+    "family": "impersonation",
+    "latency_ms": 3,
+    "cost_usd": 0.000307,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0015",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000307,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0016",
+    "risk": "high",
+    "family": "investment",
+    "latency_ms": 3,
+    "cost_usd": 0.000303,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0017",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000302,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0018",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000304,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0019",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000301,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0020",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000303,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0021",
+    "risk": "high",
+    "family": "parcel",
+    "latency_ms": 3,
+    "cost_usd": 0.000306,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0022",
+    "risk": "medium",
+    "family": "investment",
+    "latency_ms": 3,
+    "cost_usd": 0.000305,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0023",
+    "risk": "high",
+    "family": "phishing_otp",
+    "latency_ms": 3,
+    "cost_usd": 0.000304,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0024",
+    "risk": "high",
+    "family": "impersonation",
+    "latency_ms": 3,
+    "cost_usd": 0.000304,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0025",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000302,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0026",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000302,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0027",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000303,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0028",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000306,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0029",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 3,
+    "cost_usd": 0.000303,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   },
+   {
+    "id": "sb-0030",
+    "risk": "medium",
+    "family": "investment",
+    "latency_ms": 3,
+    "cost_usd": 0.000304,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    }
+   }
+  ]
+ }
+}

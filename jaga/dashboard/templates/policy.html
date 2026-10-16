@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Siapa diberitahu apa / Who is told what</h1>
+<div class="card">
+  <h2>Guardians receive</h2>{% for x in policy.guardian_receives %}<span class="pill">✅ {{ x }}</span>{% endfor %}
+  <h2>Guardians never receive</h2>{% for x in policy.guardian_never_receives %}<span class="pill">🚫 {{ x }}</span>{% endfor %}
+  <p class="muted">Current guardians: {% for g in guardians %}{{ g.name }} ({{ g.notify_policy }}){% if not loop.last %}, {% endif %}{% else %}none yet{% endfor %}</p>
+</div>
+<div class="card">
+  <h2>Rangkaian / Network (NVIDIA OpenShell policy)</h2>
+  <p>The agent runs in an OpenShell sandbox with a default-deny network. It can only reach:</p>
+  {% for x in policy.network_allowlist %}<span class="pill">{{ x }}</span>{% endfor %}
+  <p class="muted">{{ policy.credentials }}</p>
+  <details><summary>openshell-policy.yaml (as checked into the repo)</summary><pre>{{ policy_yaml }}</pre></details>
+</div>
+<div class="card"><h2>Model / Models</h2><p>{{ policy.models }}</p><h2>Retention</h2><p>{{ policy.retention }}</p></div>
+{% endblock %}

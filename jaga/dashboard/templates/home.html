@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Semak mesej yang mencurigakan</h1>
+<p class="muted">Paste a forwarded WhatsApp/SMS/Telegram message. Jaga checks the names, numbers and links against official Malaysian alert lists and the household's memory before it says anything.</p>
+<div class="card">
+  <form method="post" action="/check">
+    <textarea name="text" rows="5" required placeholder="Contoh: SEGERA — akaun Maybank anda akan disekat, sila sahkan TAC di maybank2u-secure-verify.xyz …"></textarea>
+    <div class="row" style="margin-top:10px">
+      <select name="channel" style="max-width:200px"><option value="whatsapp">WhatsApp</option><option value="sms">SMS</option><option value="telegram">Telegram</option><option value="call_transcript">Call (transcribed)</option></select>
+      <button type="submit">Semak dengan Jaga</button>
+    </div>
+  </form>
+  <form method="post" action="/check-image" enctype="multipart/form-data" class="row" style="margin-top:14px;border-top:1px dashed var(--line);padding-top:14px">
+    <span class="muted">atau / or</span>
+    <input type="file" name="image" accept="image/*" required style="max-width:340px">
+    <button type="submit">Semak tangkapan skrin / Check screenshot</button>
+  </form>
+</div>
+
+<h2>Kes terkini / Recent cases</h2>
+{% if not cases %}<p class="muted">No cases yet.</p>{% endif %}
+{% for c in cases %}
+<a href="/case/{{ c.id }}" style="text-decoration:none;color:inherit">
+<div class="card {{ c.risk }}">
+  <div class="row"><span class="risk {{ c.risk }}">{{ c.risk }}</span><span class="pill">{{ c.family }}</span>
+    <span class="muted" style="margin-left:auto">${{ '%.4f'|format(c.cost_usd or 0) }} · {{ c.latency_ms }} ms</span></div>
+  <div class="big" style="margin-top:6px">{{ c.verdict.headline_ms }}</div>
+  <div class="muted">{{ c.verdict.headline_en }}</div>
+  <div class="muted" style="font-size:14px;margin-top:6px">“{{ c.text[:140] }}{% if c.text|length > 140 %}…{% endif %}”</div>
+</div></a>
+{% endfor %}
+{% endblock %}

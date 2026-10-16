@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Apa yang Jaga lakukan dengan data anda / What Jaga did with your data</h1>
+<p class="muted">Every model call, tool call, memory write and notification, in OCSF-style events. In the OpenShell deployment this is merged with the sandbox's own OCSF audit export.</p>
+<div class="card"><table>
+<tr><th>When</th><th>Activity</th><th>Target</th><th>Outcome</th><th>Detail</th></tr>
+{% for e in events %}<tr><td class="muted" style="white-space:nowrap">{{ e.when }}</td><td><code>{{ e.activity }}</code><br><span class="muted" style="font-size:12px">OCSF {{ e.class_uid }}</span></td>
+<td>{{ e.target }}</td><td>{{ e.outcome }}</td><td><code style="font-size:12px">{{ e.detail|tojson }}</code></td></tr>{% endfor %}
+{% if not events %}<tr><td colspan="5" class="muted">No events yet.</td></tr>{% endif %}
+</table></div>
+{% endblock %}

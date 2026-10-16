@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Jaga{% endblock %}</title>
+<style>
+  :root{--bg:#fbf7f0;--card:#fff;--ink:#1f1a14;--muted:#6b6257;--line:#e8dfd2;--accent:#0f6e56;
+        --high:#b3261e;--medium:#b8700a;--low:#1b7f4c;--unknown:#6b6257;--highbg:#fdecea;--mediumbg:#fff4e0;--lowbg:#e6f5ec;--unknownbg:#f1efeb}
+  @media (prefers-color-scheme: dark){:root{--bg:#171411;--card:#211d19;--ink:#f3ede4;--muted:#b3a899;--line:#3a332c;
+        --highbg:#3a1d1b;--mediumbg:#3a2c12;--lowbg:#15301f;--unknownbg:#2a2622}}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  header{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--card)}
+  header .brand{font-weight:800;font-size:22px;color:var(--accent);text-decoration:none}
+  header nav a{color:var(--ink);text-decoration:none;margin-right:14px;opacity:.85} header nav a:hover{opacity:1;text-decoration:underline}
+  main{max-width:960px;margin:0 auto;padding:20px 16px 60px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:14px 0}
+  .risk{display:inline-block;padding:3px 12px;border-radius:999px;font-weight:700;font-size:14px;letter-spacing:.02em;text-transform:uppercase}
+  .risk.high{background:var(--highbg);color:var(--high)} .risk.medium{background:var(--mediumbg);color:var(--medium)}
+  .risk.low{background:var(--lowbg);color:var(--low)} .risk.unknown{background:var(--unknownbg);color:var(--unknown)}
+  .card.high{border-left:6px solid var(--high)} .card.medium{border-left:6px solid var(--medium)} .card.low{border-left:6px solid var(--low)} .card.unknown{border-left:6px solid var(--unknown)}
+  h1{font-size:28px;margin:8px 0 4px} h2{font-size:20px;margin:18px 0 8px} h3{font-size:17px;margin:14px 0 6px;color:var(--muted);font-weight:600}
+  .muted{color:var(--muted)} .big{font-size:21px;font-weight:700}
+  textarea,input,select{width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+  button,.btn{font:inherit;font-weight:700;padding:10px 18px;border-radius:10px;border:0;background:var(--accent);color:#fff;cursor:pointer;text-decoration:none;display:inline-block}
+  button.danger{background:var(--high)} .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  table{width:100%;border-collapse:collapse;font-size:15px} td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  code,pre{font:14px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace} pre{background:var(--bg);padding:12px;border-radius:10px;overflow:auto;border:1px solid var(--line);white-space:pre-wrap;word-break:break-word}
+  .banner{background:var(--mediumbg);color:var(--medium);padding:10px 14px;border-radius:10px;margin:0 0 14px;font-weight:600}
+  footer{text-align:center;color:var(--muted);font-size:13px;padding:20px}
+  .ev{margin:6px 0;padding-left:0;list-style:none} .ev li{padding:6px 0;border-bottom:1px dashed var(--line)}
+  .pill{display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px;margin:2px 4px 2px 0}
+  details summary{cursor:pointer;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="/">🛡️ Jaga</a>
+  <nav><a href="/">Semak / Check</a><a href="/memory">Ingatan / Memory</a><a href="/policy">Polisi / Policy</a><a href="/audit">Audit</a><a href="/health">Health</a></nav>
+</header>
+<main>
+{% if paused %}<div class="banner">⏸ Jaga is paused — inference credits exhausted ({{ paused_reason }}). Cached verdicts still work.</div>{% endif %}
+{% if mock %}<div class="banner">Demo mode: Nemotron and Tavily are replaced by deterministic stand-ins (JAGA_MOCK=1). Set NEBIUS_API_KEY and TAVILY_API_KEY for live verification.</div>{% endif %}
+{% block content %}{% endblock %}
+</main>
+<footer>Jaga · NVIDIA Nemotron on Nebius Token Factory · verification by Tavily · Hermes Agent in NVIDIA OpenShell<br>
+Active models: {% for r, m in models.items() %}<span class="pill">{{ r }} → {{ m }}</span>{% endfor %}</footer>
+</body>
+</html>
