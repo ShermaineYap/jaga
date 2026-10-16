@@ -1,157 +1,189 @@
-# 🛡️ Jaga — a private guardian that verifies before it warns
+# 🛡️ Jaga — a private scam guardian that verifies before it warns
 
-**Jaga** (Malay: *to guard*) is an always-on, private scam-shield for Malaysian seniors and the
-adult children who look after them. Forward it a WhatsApp, SMS or Telegram message and it checks
-the names, numbers and links against **official Malaysian alert lists** (Securities Commission,
-PDRM Semak Mule, Bank Negara, MCMC), consults what it remembers about the household, and quietly
-tells the right person — with evidence — when something is wrong.
+**Jaga** (Malay: *to guard*) is an always-on scam guardian for Malaysian seniors and the adult
+children who look after them. Forward it a WhatsApp/SMS message **or a screenshot** on Telegram; it
+checks the names, numbers and links against **official Malaysian alert lists** (Securities Commission,
+PDRM, Bank Negara, MCMC), consults what it remembers about the household, answers in Bahasa Malaysia
+and English — and quietly tells the family, with evidence, when something is wrong.
 
-> Malaysians lost **RM2.97 billion** to online fraud in 2025. In one year **1,916 elderly victims
-> lost over RM250 million**, and **~770,800 Malaysians over 60 now live alone**. The messages that
-> take their savings arrive on a phone nobody else sees — so the guardian has to live on that phone,
-> and it has to be private.
+> Malaysians lost **RM2.97 billion** to online fraud in 2025, and **1,916 seniors lost over RM250
+> million** in a single year. The messages that take their savings arrive on a phone nobody else sees.
 
-**Track:** Personal AI · **Bonus:** Best Use of Tavily · Nebius x NVIDIA Global AI Hackathon 2026
+**Track:** Personal AI · **Live demo:** https://jaga-q6pu.onrender.com · **Telegram:**
+[@Jaga_my_demo_bot](https://t.me/Jaga_my_demo_bot) · Nebius x NVIDIA Global AI Hackathon 2026
 
-<p align="center"><img src="docs/screenshot_case_investment.png" alt="Jaga verdict card: an investment scam flagged high risk with a cited PDRM Semak Mule hit and household-memory novelty flags" width="720"></p>
-<p align="center"><sub>Verdict card (demo mode). <code>docs/demo.gif</code>: 30-second forward → verdict → guardian-summary recording, added with the video.</sub></p>
+<p align="center"><img src="docs/demo.gif" alt="Jaga checking an investment scam: triage, verification against the SC Investor Alert List, verdict in Bahasa Malaysia" width="760"></p>
+
+**The 30-second version.** On 15 October 2026 the Securities Commission added *"RRJ Pro"* to its
+Investor Alert List. One day later, a message pitching "RRJ Pro, 30% a month, guaranteed" was
+forwarded to Jaga. Nemotron extracted the scheme name, Tavily found the SC announcement, and Jaga
+answered *"Waspada! RRJ Pro dalam senarai amaran SC"* — quoting the exact line from the SC page.
+No model's training data contains that fact; a verifying agent finds it.
 
 ---
 
-## How Jaga uses Nebius and NVIDIA (the short version)
+## How Jaga uses Nebius and NVIDIA
 
-| Layer | What | Why it is load-bearing |
+| Layer | What Jaga does with it | Why it's load-bearing |
 |---|---|---|
-| **NVIDIA Nemotron 3.5 Lightning** (`nvidia/Nemotron-3_5-Lightning`) on **Nebius Token Factory** | Triage every message with **thinking off** and **JSON-schema structured output**: scam family, entities, urgency cues, what the sender asks for | Cheap, fast, 1M-context tier for the step that runs on every message |
-| **NVIDIA Nemotron 3 Super** (`nvidia/nemotron-3-super-120b-a12b`) on Token Factory | **Thinking on, client-side budget.** Plans verification (which entity → which tool), then writes the verdict where **every claim cites a URL or household memory, or says "none found"** | Long-horizon planning + tool decisions; the judgment step |
-| **NVIDIA Nemotron 3 Ultra** (`nvidia/nemotron-3-ultra-550b-a55b`) on Token Factory | Second opinion only when money is involved and evidence is thin | Keeps the strongest model for the few cases that need it (cost stays in cents) |
-| **Token Factory Batch API** | The ScamBench-MY evaluation sweep | Higher limits, cheaper, one more surface judges can see in `eval/` |
-| **Tavily** Search (`include_domains`), Extract, Map | Model-decided verification against SC / PDRM / BNM / MCMC; nightly Map→Extract cache of the alert lists | Freshness is the whole point: a scheme added to the SC list yesterday is what a static model cannot know |
-| **NVIDIA OpenShell + NemoClaw + Hermes Agent** | The agent runs in an OpenShell sandbox with a **default-deny network** (3 hosts), credential-hiding inference routing to Token Factory, OCSF audit; Hermes gives the Telegram gateway, cron and the checked-in `jaga_case_protocol` skill | Privacy is a policy file in this repo, not a slide |
-| **Household ledger** (SQLite) | Structured two-subject memory written **deterministically after every case** | Fixes the documented gap in OpenClaw/Hermes memory (agent-curated plaintext, lost at compaction); novelty features like *"payee never seen before"* are themselves scam signals |
+| **Nemotron 3.5 Lightning** `nvidia/Nemotron-3_5-Lightning` on **Nebius Token Factory** | Triage of every message, **thinking off**, JSON-schema structured output: scam family, entities (schemes, phones, links, accounts), urgency cues | Cheap, fast tier for the step that runs on every message |
+| **Nemotron 3 Super** `nvidia/nemotron-3-super-120b-a12b` | **Thinking on, budgeted.** Plans what to verify (entity → tool → query), then writes the bilingual verdict from *verified facts only* | The judgment step. Halves false alarms vs Lightning alone (see Results) |
+| **Nemotron 3.5 Super VL** `nvidia/Nemotron-3.5-Super-VL` | Reads forwarded **screenshots**: transcribes the message, the sender as displayed, and visual red flags | Seniors forward screenshots; VL spotted "Maybank Customer Care" on a personal +60 11 number unprompted |
+| **Nemotron 3 Ultra** `nvidia/Nemotron-3-Ultra-550b-a55b` | Optional second opinion on money-involved, ambiguous cases (`JAGA_TIER=full`) | Evaluated honestly: no measurable gain on ScamBench-MY at +15% cost, so opt-in |
+| **Tavily** search (`include_domains`, `include_raw_content`), news, extract, map | Model-chosen lookups restricted to SC / PDRM / BNM / MCMC / NSRC; nightly map→extract cache; 24 h response cache | Freshness: the RRJ Pro alert was one day old |
+| **NVIDIA OpenShell 0.1.4** | Jaga's pipeline **verified running inside an OpenShell sandbox**: default-deny egress, keys held by the gateway | The sandbox only ever sees `openshell:resolve:env:…` placeholders. See [hermes/OPENSHELL_RUN.md](hermes/OPENSHELL_RUN.md) |
+| **Household ledger** (SQLite) | Structured two-subject memory written deterministically after every case; OCSF-style audit | Trust is earned by a *saved phone number*, never a typed name |
 
-Model IDs live in `.env`, never in code; each role has a fallback chain; `/health` shows the active
-IDs. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full diagram.
+Model IDs live in `.env` with fallback chains; `/health` shows what resolved live.
+
+## Results — ScamBench-MY (300 messages) and a memory test (20)
+
+`eval/data/scambench_my.jsonl`: 300 hand-written messages, 150 scams across 6 families
+(impersonation, investment, love, mule, parcel, phishing/OTP) and 150 legitimate messages — 52 of
+them *hard negatives* that look like scams (genuine TAC warnings, real courier fees, a daughter asking
+for money). 40% Bahasa Malaysia, 35% English, 25% Manglish. All live runs on Nebius Token Factory.
+
+<p align="center"><img src="eval/results/chart_f1_fpr.png" width="820" alt="F1 and false-positive rate per configuration"></p>
+
+| Configuration | F1 | Scams caught | False alarms on legit | USD / 1,000 msgs |
+|---|---|---|---|---|
+| Keyword rules (no model) | 0.763 | 76.0% | 23.3% | — |
+| Nemotron 3.5 Lightning only | 0.892 | 98.7% | 22.7% | $0.18 |
+| **Default: Lightning + Super + Tavily + memory** | **0.946** | **98.7%** | **10.0%** | **$2.18** |
+| Default + Nemotron 3 Ultra second opinion | 0.936 | 97.3% | 10.7% | $2.51 |
+| … + Ultra, without Tavily | 0.955 | 98.7% | 8.0% | $2.55 |
+| … + Ultra, without household memory | 0.955 | 99.3% | 8.7% | $2.51 |
+
+**What the numbers say** (95% paired-bootstrap CIs in [eval/results/CI.md](eval/results/CI.md)):
+
+* **Tiering works.** Adding Super's planning and verdict to Lightning **halves false alarms**
+  (22.7% → 10.0%) at the same recall: ΔF1 +0.054 [+0.025, +0.089], ΔFPR −12.7 pts [−19.9, −6.0].
+  Lightning alone is an excellent detector but too jumpy to trust with a senior's phone.
+* **Ultra didn't earn its cost here** (ΔF1 −0.010 [−0.033, +0.013]), so it's opt-in rather than default.
+* **Tavily and memory don't move aggregate F1 on ScamBench-MY — by design of the benchmark.** Its
+  scam names and numbers are fictional, so no official list contains them, and none of its messages
+  come from the household's saved contacts. Their value shows where the benchmark can't: real,
+  newly-listed entities (RRJ Pro, cited above) and known contacts —
+
+**Memory test** (`eval/data/memory_set.jsonl`, 20 messages): 10 genuine, urgent-sounding messages
+from saved contacts (daughter, insurance agent, doctor) and 10 impersonations of the *same people*
+from new numbers ("Mum, it's Siti, new number…").
+
+| Configuration | Impersonations caught | Genuine messages wrongly flagged |
+|---|---|---|
+| Lightning only | 10 / 10 | 2 / 10 |
+| default **without** memory | 10 / 10 | 3 / 10 |
+| **default with memory** | **10 / 10** | **0 / 10** |
+
+Small sample — directional, not proof. It also caught a real bug: an earlier version trusted a
+contact's *name*, which cleared "Mum, it's Siti, new number". Trust now requires the saved number,
+and a saved name from an unsaved number is itself a red flag (`tests/test_pipeline.py`).
 
 ---
 
 ## Technological Implementation
 
 ```
-Senior / guardian ── Telegram (Hermes gateway) ──▶ OpenShell sandbox (nemohermes)
-                                                   │  egress: tokenfactory · tavily · telegram only
-                                                   │
-   Lightning (thinking off, JSON) ── triage ───────┤
-   ledger.context_for() ── trusted matches, novelty flags
-   Super (thinking on, budget) ── verification plan ─┤──▶ Tavily search_official / search_news / alert_cache
-   Super ── verdict with cited evidence ─────────────┤
-   Ultra ── second opinion if verdict.escalate ──────┤
-   ledger.record_case() ── deterministic memory + OCSF audit
-   notify ── guardians get risk + headline + action, never the message
+Senior / guardian ── Telegram or dashboard ──▶ Jaga
+   screenshot? ─▶ Nemotron 3.5 Super VL (transcribe + visual red flags)
+   Nemotron 3.5 Lightning ── triage (thinking off, strict JSON schema)
+   regex backstop ── phones / links / accounts the model missed
+   household ledger ── trusted matches (by saved number) + novelty flags
+   Nemotron 3 Super ── verification plan (thinking on, budget 2.5k)
+   policy floor ── every named entity in a scam-pattern message gets ≥1 official lookup
+   Tavily ── official-domain search ∥ news ∥ cache (parallel, 24 h cached)
+   relevance check ── a page counts only if the entity is literally on it
+   Nemotron 3 Super ── verdict from verified facts only (BM + EN)
+   policy in code ── evidence rebuilt from verified hits, NSRC 997 on high risk, never "safe"
+   [optional] Nemotron 3 Ultra ── second opinion on money + ambiguity
+   ledger.record_case ── deterministic memory + audit; guardians get a summary, never the message
 ```
 
-* `jaga/llm.py` — Token Factory client: structured output, `chat_template_kwargs.enable_thinking`,
-  reasoning budgets, cost accounting, 404/402/429 degradation along the chain.
-* `jaga/pipeline.py` — the loop above; every step is an ablation switch.
-* `jaga/tavily_tools.py` — deterministic tools, testable without a model; a result only counts as
-  evidence if the entity itself appears in it.
-* `jaga/ledger.py` — structured memory + audit; export / delete-all.
-* `hermes/` — `SKILL.md`, `openshell-policy.yaml`, `jaga_tools.py`, `setup_nemohermes.sh`.
-* `eval/` — ScamBench-MY (300 labelled BM/EN/Manglish messages) + harness + charts.
+Engineering details judges may care about, each found by live testing and fixed in code:
+
+* **Strict schemas.** Nemotron's guided decoding skipped optional fields (entities came back empty);
+  every schema is sent with all properties `required` and bounded `maxItems`/`maxLength`
+  (`jaga/llm.py:strict_schema`). Bounded lists also stopped a repetition loop in Lightning.
+* **No invented sources.** The model once cited a real Bank Negara page for a phone number that isn't
+  on it. Web evidence is now rebuilt solely from deterministic tool hits, and the verdict model only
+  sees verified facts (`jaga/pipeline.py:_enforce_policy`, regression test included).
+* **Degradation.** Model fallback chains (404/429), a "paused" state on HTTP 402, a 24 h search cache,
+  `JAGA_MOCK=1` offline mode for tests and a recorded-run fallback.
 
 ## Design
 
-A complete loop, not a proof of concept: Telegram in → verdict card in Bahasa Malaysia and English
-→ guardian summary → family dashboard with verdict cards, cited evidence, **memory viewer**,
-**policy screen** (who is told what; the OpenShell network policy rendered), **audit timeline**
-("what Jaga did with your data"), export and delete-all. Zero setup for the senior beyond
-forwarding a message.
+A complete loop: Telegram in → bilingual card back → guardian summary → family dashboard with verdict
+cards and cited evidence, a "how Jaga decided" trace (model per step, checks, cost, latency), memory
+viewer and trusted-contact editor, a **policy page** (who is told what), an **audit timeline**, export
+and delete-all. A progress overlay explains the 15–20 s verification. Zero setup for the senior.
 
 ## Potential Impact
 
-Sources for the numbers above: Home Ministry parliamentary reply (RM2.97b, 2025) via
+Sources: Home Ministry parliamentary reply via
 [Malay Mail](https://www.malaymail.com/amp/news/malaysia/2026/06/24/online-scam-losses-surge-to-rm297b-in-2025-says-home-ministry-as-fraud-trend-worsens-across-malaysia/225000);
-Bukit Aman elderly victims via [The Sun](https://thesun.my/malaysia-news/1916-elderly-victims-fall-prey-to-online-scams-losing-over-rm250-million-this-year-JH13053183);
-NHMS 2025 on seniors living alone via [Malay Mail](https://www.malaymail.com/news/life/2026/10/12/malaysias-ageing-population-raises-alarm-over-lonely-deaths-how-does-smart-tech-help/238728).
-Jaga is decision support: it never says "safe", always shows evidence, and for high risk always
-points to **NSRC 997**.
+Bukit Aman via [The Sun](https://thesun.my/malaysia-news/1916-elderly-victims-fall-prey-to-online-scams-losing-over-rm250-million-this-year-JH13053183);
+NHMS 2025 via [Malay Mail](https://www.malaymail.com/news/life/2026/10/12/malaysias-ageing-population-raises-alarm-over-lonely-deaths-how-does-smart-tech-help/238728).
+At $2.18 per 1,000 messages, a household forwarding 20 messages a month costs about US$0.50
+(≈ RM2.30) a year in inference. Jaga is decision support: it never says "safe" and always points high-risk cases to
+**NSRC 997**.
 
 ## Quality of the Idea
 
 Most "AI vs scams" demos are classifiers. Jaga **verifies**: the model decides what to check, Tavily
-fetches the authority page, and the verdict cites it — or says plainly that nothing was found.
-Memory is two-subject and structured, so the planner knows that *Encik Faizal from Prudential* is
-Mum's real agent and that *this payee has never been seen before*. Privacy is enforced in code and
-policy (summary-only notifications, default-deny egress, audit), not promised in a prompt.
+fetches the authority page, code confirms the entity is really on it, and only then is it cited.
+Memory is structured and two-subject (the protected parent and the guardians). Privacy is enforced in
+code and in an OpenShell policy, not promised in a prompt.
 
 ---
 
-## Results — ScamBench-MY
+## Privacy and NVIDIA OpenShell
 
-`eval/data/scambench_my.jsonl`: 300 labelled messages (150 scam across 6 families, 150 legitimate
-of which ~35% are *hard negatives* that share surface features with scams), ~40% BM / 35% EN /
-25% Manglish. Metrics: F1, **false-positive rate on legitimate messages** (the number that decides
-whether a family keeps using it), per-family recall, per-language F1, median latency, USD per
-1,000 messages at Token Factory list prices, with ablations (−Tavily, −memory) and a rules-only
-baseline.
+Jaga's case pipeline runs inside an **NVIDIA OpenShell 0.1.4** sandbox under a default-deny egress
+policy that allows only Nebius Token Factory, Tavily and Telegram. The Nebius and Tavily keys stay in
+the OpenShell gateway: the sandbox only ever sees `openshell:resolve:env:…` placeholders, and the
+proxy injects the real key only for its own host.
 
-<p align="center"><img src="eval/results/chart_f1_fpr.png" width="760"></p>
+<p align="center"><img src="docs/openshell_proof.png" width="820" alt="Terminal: placeholder key inside the sandbox, example.com refused, live verdict, OCSF audit log"></p>
 
-The committed `eval/results/RESULTS.md` is produced by `make eval` (live) or `make eval-mock`
-(offline heuristics baseline). The live sweep costs roughly $1–3 of Token Factory credit.
+Tested on 16 Oct 2026 with the gateway container and the OpenShell Python SDK; commands, evidence
+and a 12-item friction log are in [hermes/OPENSHELL_RUN.md](hermes/OPENSHELL_RUN.md); reproduce with
+`bash hermes/setup_nemohermes.sh`. **Not yet run under OpenShell:** the NemoClaw/Hermes Agent
+onboarding (`nemohermes` is not published on PyPI or npm yet) and the Telegram gateway. The public
+demo on Render is a normal web service: keys are server-side environment variables there, and the
+dashboard's policy page says so.
 
-A 500-question **MalayMMLU** subset (`scripts/malaymmlu_subset.py`) gives an honest Bahasa Malaysia
-number for Nemotron — reported in [docs/FEEDBACK.md](docs/FEEDBACK.md).
-
----
-
-## Quickstart (5 minutes)
+## Quickstart
 
 ```bash
-git clone https://github.com/<you>/jaga && cd jaga
+git clone https://github.com/ShermaineYap/jaga && cd jaga
 pip install -r requirements.txt
-cp .env.example .env          # add NEBIUS_API_KEY, TAVILY_API_KEY (TELEGRAM_BOT_TOKEN optional)
-
-python scripts/list_models.py # day-one: confirm Nemotron IDs on Token Factory
-python scripts/seed_demo.py   # demo household + 3 demo cases
-uvicorn jaga.dashboard.app:app --port 8000   # http://localhost:8000
-python -m jaga.bot            # Telegram gateway (standalone; Hermes replaces this in the OpenShell deployment)
+cp .env.example .env                 # NEBIUS_API_KEY, TAVILY_API_KEY, optional TELEGRAM_BOT_TOKEN
+python scripts/list_models.py        # confirm Nemotron IDs on your Token Factory account
+python scripts/seed_demo.py          # demo household + 3 cases (incl. RRJ Pro)
+uvicorn jaga.dashboard.app:app --port 8000
+python -m jaga.bot                   # Telegram gateway
 ```
 
-No keys? `JAGA_MOCK=1` runs everything with deterministic stand-ins (that is also the recorded-run
-fallback if credits are exhausted during judging). `make test` runs the offline suite.
+No keys? `JAGA_MOCK=1` runs everything offline. `make test` runs 11 tests.
+Evaluation: `python eval/run_eval.py` (≈ $3 of Token Factory credit for all configurations),
+`python eval/bootstrap.py`, `python eval/charts.py`.
+Deploy: `render.yaml` (one-click Blueprint) or `docker compose up -d`.
 
-**Judges:** demo URL and test credentials are in the Devpost submission. `POST /api/check
-{"text": "..."}` returns the full case JSON. `/health` shows the live model IDs.
-
-### Hermes Agent inside NVIDIA OpenShell
-
-```bash
-export NEBIUS_API_KEY=… TAVILY_API_KEY=… TELEGRAM_BOT_TOKEN=…
-bash hermes/setup_nemohermes.sh      # nemohermes onboard → inference set → policy apply → skill + cron
-```
-
-### Docker
-
-```bash
-docker compose up -d   # dashboard :8000, Telegram bot, nightly alert-cache refresh
-```
+**Judges:** `POST https://jaga-q6pu.onrender.com/api/check` with `{"text": "..."}` returns the full
+case JSON; `/health` shows the live model IDs. The free instance sleeps when idle — the first request
+can take ~50 s to wake.
 
 ## Known limitations
 
-* **Text and screenshots-as-text only.** Nebius removed NVIDIA's multimodal models (Nemotron 3 Nano
-  Omni, Cosmos Reasoner) from Token Factory serverless on 31 Aug 2026 and Token Factory has no
-  speech product, so voice notes are a documented next step (Cosmos Reason 2 on a Serverless
-  Endpoint, or a speech model when one returns).
-* Nemotron's documented languages do not include Malay. We measured it (MalayMMLU subset) and route
-  accordingly; see FEEDBACK.md.
-* Jaga is decision support, not an official warning service. It cites SC / PDRM / BNM pages; it
-  never speaks as them.
+* No voice notes yet: Token Factory has no speech model.
+* Malay isn't in Nemotron's documented languages. It worked well here (18/20 on day one; per-language
+  F1 in `eval/results/RESULTS.md`), but formal Malay is weaker than Manglish.
+* PDRM Semak Mule is a form lookup that search can't reach; phone-number checks rely on SC/BNM/news.
+* ScamBench-MY is hand-written by the author; it is a sanity benchmark, not a field study.
 
-## Feedback on Token Factory, AI Cloud, NVIDIA tools
+## Feedback on Token Factory, Tavily, OpenShell and Nemotron
 
-See [docs/FEEDBACK.md](docs/FEEDBACK.md) — what each tool was used for, what worked, what needs
-work, zero-to-hello-world time, and whether we would build with them again.
+[docs/FEEDBACK.md](docs/FEEDBACK.md) — concrete issues we hit, with exact symptoms and workarounds.
 
 ## License
 
