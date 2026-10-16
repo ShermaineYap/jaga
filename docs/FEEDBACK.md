@@ -1,78 +1,103 @@
-# Feedback on Nebius Token Factory, Nebius AI Cloud, Tavily and NVIDIA tools
+# Feedback on Nebius Token Factory, Tavily, NVIDIA Nemotron and NVIDIA OpenShell
 
-> Required part of the submission (and eligible for the "Most Valuable Feedback" prize). Items
-> marked **[verify]** are expectations from the docs — replace them with what actually happened
-> on your machine as you build. Be specific: command, error text, minutes lost, workaround.
+Written from building Jaga between 16 and 30 October 2026, solo, on a $25 Token Factory balance.
+Every item below happened in this build; commands and symptoms are exact. Numbers come from
+`eval/results/RESULTS.md`.
 
-## Nebius Token Factory
+---
 
-**What we used it for.** All inference: Nemotron 3.5 Lightning (triage, thinking off, JSON schema),
-Nemotron 3 Super (plan + verdict, thinking on, budgeted), Nemotron 3 Ultra (escalation). Batch API
-for the 300-message evaluation sweep. `/v1/models` for a startup health check.
+## 1. Nebius Token Factory
 
-**What worked.**
-- OpenAI-compatible API meant the whole client is ~150 lines; structured output with a Pydantic
-  JSON schema returned valid objects on **[verify: n/300]** of triage calls.
-- Pricing: at Lightning's $0.06/$0.24 per 1M tokens the per-message cost is effectively zero; the
-  full three-tier pipeline measured **$[fill] per 1,000 messages**.
-- **[verify]** `chat_template_kwargs: {"enable_thinking": false}` passed through the API as documented.
+**What we used.** All inference: Nemotron 3.5 Lightning (triage, thinking off), Nemotron 3 Super
+(planning + verdict, thinking on with a client-side budget), Nemotron 3 Ultra (escalation), Nemotron
+3.5 Super VL (screenshots). JSON-schema structured output on every call. `/v1/models` as a startup
+health check. ~1,800 evaluation cases over the build.
 
-**What needs work.**
-- **No spend cap or balance alert.** HTTP 402 arrives mid-request. We had to build a "paused"
-  state and a cached-verdict fallback. A soft limit + webhook would remove that whole code path.
-- **Model ID stability.** We could not find a guarantee that Nemotron 3 IDs stay stable through
-  the judging window, so IDs live in `.env` with fallback chains. A deprecation header or a
-  `/v1/models?include=deprecations` field would let clients degrade gracefully.
-- **Multimodal gap.** Nemotron 3 Nano Omni and Cosmos3-Super-Reasoner were removed from serverless
-  on 31 Aug 2026 with no replacement NVIDIA vision/audio model, and there is no speech product. For a
-  Personal AI assistant that is the single biggest missing piece — voice notes are how seniors
-  actually forward things.
-- **Fine-tuning.** The marketing page says Nemotron can be fine-tuned serverlessly; the post-training
-  docs' base-model list has no Nemotron. One or the other should change.
-- **Credits.** Promo credit expires **[verify: date]**; the Builders credit expires 90 days after
-  issue, which is before the Dec 1–15 judging window. A hackathon-specific expiry aligned to the
-  judging window would help every entrant.
-- Malay: Nemotron's documented languages exclude Malay. On a 500-question MalayMMLU subset we
-  measured Lightning **[fill]%** / Super **[fill]%**; on ScamBench-MY the BM-language F1 was
-  **[fill]** vs English **[fill]**. **[verify and describe]**
+**Zero to first Nemotron call: ~4 minutes.** Google sign-in → organisation auto-created → billing
+already active with a $25 balance plus a $1 / 6-day trial → *Get API key* → OpenAI SDK with
+`base_url=https://api.tokenfactory.nebius.com/v1/`. Smoothest onboarding of any provider we used.
 
-**Zero to hello-world:** **[fill]** minutes (sign-up → card → promo code → first Nemotron call).
-**Would we build with it again?** Yes — for text. We would need a speech/vision path on serverless
-to ship Jaga's next version on it.
+**What worked**
+- Price/performance: the full three-tier pipeline costs **$[fill]/1,000 messages**; the Malay smoke
+  test (20 messages × 2 models) cost **$0.0044**.
+- `chat_template_kwargs: {"enable_thinking": false}` passes through and works on Lightning/Super;
+  Super returns its reasoning separately in `reasoning_content`, so content stays clean JSON.
+- Bahasa Malaysia: although Malay is not in Nemotron's documented languages, Lightning and Super each
+  classified **18/20** Malay/Manglish scam and legit messages correctly on day one.
+- Nemotron 3.5 Super VL transcribed a WhatsApp scam screenshot near-verbatim and spontaneously
+  flagged "display name 'Maybank Customer Care' on a personal +60 11 number" as a red flag.
 
-## Nebius AI Cloud (Serverless Jobs / Endpoints / Devlabs)
+**What needs work (most valuable first)**
+1. **Guided decoding silently drops optional fields.** With `response_format: json_schema`, any
+   property that has a default (i.e. is not in `required`) was omitted by Lightning on almost every
+   call: our `entities` lists came back empty, so nothing was ever verified. Root cause took ~40 min.
+   Fix on our side: rewrite every schema so all properties are `required` (`jaga/llm.py:strict_schema`).
+   *Ask:* document this prominently, or emit a warning when a schema has optional properties.
+2. **Repetition loops inside list fields.** Lightning sometimes emits `"persons": ["u", "u", "u", …]`
+   until `max_tokens`, producing invalid JSON (~1 in 12 calls in our first sweep). `maxItems` in the
+   schema plus `frequency_penalty=0.3` removed it (0 failures in 48 calls after). *Ask:* enforce
+   `maxItems`/`maxLength` in the guided decoder, and mention the failure mode in the model card.
+3. **Inconsistent model-ID casing in one family.** `nvidia/nemotron-3-super-120b-a12b` (lowercase) vs
+   `nvidia/Nemotron-3-Ultra-550b-a55b` vs `nvidia/Nemotron-3_5-Lightning` (underscore) vs
+   `nvidia/Nemotron-3.5-Super-VL` (dot) vs `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`. We guessed the
+   Ultra ID wrong and our fallback silently routed escalations to Super until `/v1/models` showed it.
+   *Ask:* case-insensitive model lookup, or aliases.
+4. **Vision + `json_object` mode returns the schema shape.** With `response_format: json_object` and
+   the schema pasted into the prompt, Super VL returned `{"description": …, "properties": {…answer…}}`.
+   `json_schema` mode fixed it.
+5. **No spend cap or low-balance alert.** HTTP 402 arrives mid-request; we built a "paused" state.
+   A soft cap + email/webhook would help every hackathon entrant keep demos alive to Dec 15.
+6. **Deprecations.** Nemotron 3 Nano Omni and Cosmos3-Super-Reasoner left serverless on 31 Aug 2026;
+   the Nemotron marketing page still listed Nano Omni when we started. The new Super VL filled the
+   vision gap for us, but there is still **no speech model**, and voice notes are how Malaysian seniors
+   actually forward things. A `deprecations` field on `/v1/models` would let clients degrade gracefully.
+7. **Fine-tuning claim mismatch.** The Nemotron product page advertises serverless fine-tuning;
+   the post-training docs' base-model list contains no Nemotron.
 
-**What we used it for.** **[fill: "A CPU VM to host the OpenShell/Hermes box" / "Not used — the
-rules allow Token Factory-only, and AI Cloud needs a separate $25 top-up with no free trial"]**.
-**Feedback.** Separate billing from Token Factory and no trial made it hard to justify for a
-text-only agent. If Cosmos Reason 2 were a one-click Serverless Endpoint with a documented cold-start
-time and per-request pricing, we would have used it for screenshots.
+**Would we build on it again?** Yes. The three-tier Nemotron routing is only economical because of
+Token Factory's prices, and onboarding was effortless.
 
-## Tavily
+## 2. Nebius AI Cloud (Serverless / DevPods)
 
-**What we used it for.** Search with `include_domains` restricted to SC / PDRM / BNM / MCMC / NSRC;
-`topic=news` with `days` for recent scam reports; Extract to pull the alert page as evidence; Map +
-Extract on a nightly cron into a local cache.
-**What worked.** `include_domains` + `include_raw_content` made "cite the authority page" trivial.
-Free tier (1,000 credits/month) covered development.
-**What needs work.** **[verify]** Coverage of Malaysian government pages (SC investor alert list is a
-long paginated table; Semak Mule is a form-driven lookup) — describe what Search/Extract returned
-and whether Map found the pages. A first-class "official sources" domain pack per country would help.
+**Not used.** The rules allow Token Factory-only, AI Cloud is billed separately, has no trial and
+needs a $25 top-up. For a text/vision agent that calls hosted Nemotron, there was nothing to run on a
+GPU. If a one-click Serverless Endpoint template existed for "Hermes Agent + OpenShell gateway" with
+per-second CPU pricing, we would have hosted the whole agent on Nebius.
 
-## NVIDIA OpenShell / NemoClaw / Hermes Agent
+## 3. Tavily
 
-**What we used it for.** Hermes Agent as the always-on agent (Telegram gateway, cron, skills),
-onboarded into an OpenShell sandbox via `nemohermes`, inference routed to Token Factory, default-deny
-network policy, OCSF audit.
-**What worked / needs work.** **[fill from your run of hermes/setup_nemohermes.sh: install time,
-sudo/CDI prompts, egress blocks for pip, policy schema mismatches, port-forward drops]**. The idea
-that credentials never enter the sandbox is exactly right for a personal agent that reads private
-messages; the docs should show one end-to-end example with a non-NVIDIA inference URL.
+**What we used.** `/search` with `include_domains` (SC, PDRM, BNM, MCMC, NSRC) and
+`include_raw_content`; `/search` with `topic=news`; `/extract` to read alert pages; `/map` for the
+nightly cache. ~[fill] credits over the build.
 
-## NVIDIA Nemotron (models)
+**What worked**
+- **Freshness is real:** "RRJ Pro" was added to the Securities Commission Investor Alert List on
+  15 Oct 2026; one day later Tavily returned that exact announcement page, and Jaga cites it with the
+  matching sentence. No model could know this from training data.
+- `include_domains` makes "cite an authority, never a blog" a one-line guarantee.
+- The hackathon coupon `BBDEVPOST` added **8,000 credits** instantly; onboarding took ~2 minutes.
 
-- Lightning's structured-output reliability and speed made it the right "every message" tier.
-- Super's planning was **[verify: good / over-planned / under-planned]** at a 2.5k budget.
-- Ultra was invoked on **[fill]%** of cases; it changed the verdict on **[fill]** of them.
-- The reasoning toggle being a chat-template flag rather than a first-class API parameter is fine
-  but should be documented on the Token Factory model page, not only on the HF card.
+**What needs work**
+- The entity sits deep in SC announcement pages, below site navigation. Snippets rarely contain it,
+  so a relevance check needs `raw_content` (we read up to 40k chars). A "highlight the query terms"
+  field in each result would save bandwidth and make citations easy.
+- Search recall depended on wording: `"RRJ Pro" scam investor alert` found the page in some runs and
+  not others. We now always add one canonical query per entity. A country "official sources" preset
+  (e.g. `region=MY, source_type=regulator`) would be valuable.
+- PDRM Semak Mule is a form-driven lookup that search cannot reach; an Extract mode for simple GET
+  forms would close that gap.
+
+## 4. NVIDIA OpenShell / NemoClaw / Hermes Agent
+
+[fill from hermes/OPENSHELL_RUN.md — friction log]
+
+## 5. NVIDIA Nemotron (models)
+
+- Tiering works and the evaluation shows why: Lightning alone recalls [fill]% of scams but flags
+  [fill]% of legitimate messages; adding Super planning + Tavily verification brings false positives
+  to [fill]% at [fill] cost. Ultra was invoked on [fill]% of cases.
+- Super with reasoning on follows rules literally: told "never plan a check for an entity not in the
+  triage", it planned *zero* checks when triage had missed the entity. Instructions need to be phrased
+  as goals, with code-level floors underneath.
+- The reasoning toggle being a chat-template flag rather than an API parameter is fine, but it should
+  be on the Token Factory model page, not only the Hugging Face card.
