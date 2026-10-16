@@ -8,7 +8,11 @@
 </div>
 <div class="card">
   <h2>Rangkaian / Network (NVIDIA OpenShell policy)</h2>
-  <p>The agent runs in an OpenShell sandbox with a default-deny network. It can only reach:</p>
+  {% if policy.deployment == "openshell" %}
+  <p>This instance runs in an NVIDIA OpenShell sandbox with a default-deny network. It can only reach:</p>
+  {% else %}
+  <p><b>You are viewing the hosted demo.</b> In the private deployment Jaga runs as Hermes Agent inside an NVIDIA OpenShell sandbox with a default-deny network that can only reach:</p>
+  {% endif %}
   {% for x in policy.network_allowlist %}<span class="pill">{{ x }}</span>{% endfor %}
   <p class="muted">{{ policy.credentials }}</p>
   <details><summary>openshell-policy.yaml (as checked into the repo)</summary><pre>{{ policy_yaml }}</pre></details>

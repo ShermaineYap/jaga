@@ -103,6 +103,8 @@ MOCK = _env("JAGA_MOCK", "0") == "1" or not NEBIUS_API_KEY
 DB_PATH = Path(_env("JAGA_DB", str(ROOT / "data" / "jaga.sqlite3")))
 DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 DEMO_HOUSEHOLD = _env("JAGA_DEMO_HOUSEHOLD", "demo-household")
+# "openshell" when running inside the NVIDIA OpenShell sandbox (hermes/), else "hosted".
+DEPLOYMENT = _env("JAGA_DEPLOYMENT", "hosted")
 DASHBOARD_RATE_LIMIT_PER_MIN = int(_env("JAGA_RATE_LIMIT", "10"))
 
 

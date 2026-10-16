@@ -30,7 +30,11 @@ STATE = {"paused": False, "paused_reason": ""}
 POLICY = {
     "network_allowlist": ["api.tokenfactory.nebius.com (Nemotron inference)", "api.tavily.com (verification)",
                           "api.telegram.org (messages)"],
-    "credentials": "API keys are injected by OpenShell's inference routing; the agent process never sees them.",
+    "credentials": ("API keys are injected by OpenShell's inference routing; the agent process never sees them."
+                    if config.DEPLOYMENT == "openshell" else
+                    "This hosted demo keeps API keys as server-side environment variables (never sent to the browser). "
+                    "In the OpenShell deployment (hermes/), keys stay outside the sandbox and are injected by the gateway."),
+    "deployment": config.DEPLOYMENT,
     "guardian_receives": ["risk level", "one-line headline", "recommended action", "one evidence link"],
     "guardian_never_receives": ["the original message text", "sender phone numbers", "screenshots"],
     "retention": "Everything is in one SQLite file you can export or delete from this page.",
