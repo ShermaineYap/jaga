@@ -53,6 +53,7 @@ CONFIGS = {
     "full":      dict(tier="full", use_tavily=True, use_ledger=True),
     "no_tavily": dict(tier="full", use_tavily=False, use_ledger=True),
     "no_ledger": dict(tier="full", use_tavily=True, use_ledger=False),
+    "plan_no_ledger": dict(tier="plan", use_tavily=True, use_ledger=False),
 }
 
 # Trusted contacts seeded into the eval household so hard negatives from known

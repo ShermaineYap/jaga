@@ -147,3 +147,14 @@ def test_headline_cannot_claim_unverified_list_match():
     assert "senarai" not in v.headline_ms.lower() and "list" not in v.headline_en.lower()
     assert v.recommended_action.startswith("Jangan") and "997" in v.recommended_action
     assert v.explanation
+
+
+def test_impersonation_of_saved_contact_asking_money_is_high():
+    from jaga.pipeline import _enforce_policy
+    from jaga.schemas import Entities, Triage, Verdict
+    tri = Triage(family="legit", confidence=0.6, language="en", urgency_cues=[], asks_for=["transfer"],
+                 entities=Entities(phones=["011-9999 0461"], bank_accounts=["5566778899001"], amounts=["RM900"]), one_line="x")
+    v = Verdict(risk="low", family="legit", headline_ms="ok", headline_en="ok", explanation="x", evidence=[],
+                recommended_action="Proceed.", notify_family=False, escalate=False)
+    _enforce_policy(v, {"trusted_matches": [], "novelty_flags": ["claims to be Siti but uses a number not saved for them"]}, [], tri)
+    assert v.risk == "high" and v.family == "impersonation" and "Siti" in v.headline_en and "997" in v.recommended_action

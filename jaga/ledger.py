@@ -129,7 +129,7 @@ class Ledger:
             return [dict(r) for r in con.execute("SELECT * FROM payees WHERE household_id=? ORDER BY last_seen DESC", (household_id,))]
 
     # --------------------------------------------------------------- context
-    def context_for(self, household_id: str, triage: Triage) -> dict[str, Any]:
+    def context_for(self, household_id: str, triage: Triage, text: str = "") -> dict[str, Any]:
         """What the planner gets to see: trusted matches + novelty flags.
         Deliberately small and structured — no raw history is sent to the model."""
         contacts = self.contacts(household_id)
@@ -141,7 +141,7 @@ class Ledger:
         # Trust is earned by the saved PHONE NUMBER, never by a name or organisation the
         # sender types — "Mum, it's Siti, new number" is the most common impersonation
         # script, and in evaluation a name-only match cleared exactly that scam.
-        text_l = " ".join([triage.one_line] + triage.entities.persons + triage.entities.orgs).lower()
+        text_l = " ".join([text, triage.one_line] + triage.entities.persons + triage.entities.orgs).lower()
         for c in contacts:
             if not c["trusted"]:
                 continue

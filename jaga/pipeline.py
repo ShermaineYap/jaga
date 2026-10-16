@@ -86,7 +86,7 @@ def _plan_floor(plan: VerificationPlan, triage: Triage) -> None:
     plan.needs_live_check = bool(plan.checks)
 
 
-def _enforce_policy(verdict: Verdict, ledger_ctx: dict, tool_results: list[dict]) -> None:
+def _enforce_policy(verdict: Verdict, ledger_ctx: dict, tool_results: list[dict], triage: Triage | None = None) -> None:
     """Rules that must hold whatever the model wrote. Enforced in code, not by prompt."""
     from .schemas import Evidence
     # 1. Web evidence comes ONLY from verified tool hits (the entity was found on that page by a
@@ -141,6 +141,20 @@ def _enforce_policy(verdict: Verdict, ledger_ctx: dict, tool_results: list[dict]
         verdict.headline_ms = defaults[verdict.risk][0]
     if not verdict.headline_en.strip():
         verdict.headline_en = defaults[verdict.risk][1]
+    # 6b. Deterministic rule: someone claiming to be a saved contact, from a number not saved for
+    #     them, asking for money, is the "Mum, it's me, new number" script. Always high risk.
+    claims = [f for f in ledger_ctx.get("novelty_flags", []) if f.startswith("claims to be")]
+    money = triage is not None and (bool(triage.entities.bank_accounts) or bool(triage.entities.amounts)
+                                    or any(a.lower() in ("transfer", "tac") for a in triage.asks_for))
+    if claims and money and verdict.risk != "high":
+        verdict.risk = "high"
+        verdict.family = "impersonation"
+        who = claims[0].replace("claims to be ", "").split(" but ")[0].split(" without ")[0]
+        verdict.headline_ms = f"Amaran: mesej ini mengaku sebagai {who} tetapi bukan dari nombor yang disimpan."
+        verdict.headline_en = f"Warning: this claims to be {who} but doesn't come from their saved number."
+        verdict.recommended_action = ("Jangan hantar wang. Hubungi orang itu di nombor lama yang anda simpan. / "
+                                      "Do not send money. Call them on the number you already have saved.")
+        verdict.explanation = f"{claims[0]}; the message asks for money. " + verdict.explanation
     # 5. High risk always points to the National Scam Response Centre.
     if verdict.risk == "high" and "997" not in verdict.recommended_action:
         verdict.recommended_action = verdict.recommended_action.rstrip(". ") + ". Jika wang sudah dihantar, hubungi NSRC 997 segera / If money was sent, call NSRC 997 now."
@@ -173,7 +187,7 @@ class Jaga:
         _backstop_entities(triage, text)
 
         # 2. Structured memory
-        ledger_ctx = self.ledger.context_for(opts.household_id, triage) if opts.use_ledger else \
+        ledger_ctx = self.ledger.context_for(opts.household_id, triage, text) if opts.use_ledger else \
             {"trusted_matches": [], "novelty_flags": [], "recent_families": [], "contacts_known": 0, "payees_known": 0}
 
         plan: VerificationPlan | None = None
@@ -244,7 +258,7 @@ class Jaga:
             context={"triage": triage, "ledger": ledger_ctx, "tool_results": tool_results})
         # Memory flags shown to the family come from the ledger (code), never from model text.
         verdict.novelty_flags = list(ledger_ctx.get("novelty_flags", [])) if opts.use_ledger else []
-        _enforce_policy(verdict, ledger_ctx, tool_results)
+        _enforce_policy(verdict, ledger_ctx, tool_results, triage)
 
         # 6. Escalation
         escalation: EscalationOpinion | None = None
