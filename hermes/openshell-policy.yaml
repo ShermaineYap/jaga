@@ -1,15 +1,23 @@
 # NVIDIA OpenShell sandbox policy for Jaga — REAL schema (OpenShell 0.1.4,
-# docs/how-it-works/policies/schema.mdx). Validated by a running gateway on
-# 2026-10-16; see hermes/OPENSHELL_RUN.md for the exact run and evidence.
+# docs/how-it-works/policies/schema.mdx in NVIDIA/OpenShell). Accepted by a
+# running 0.1.4 gateway (Docker driver) on 2026-10-16; evidence in
+# hermes/OPENSHELL_RUN.md.
 #
-# Default-deny: any (binary, host:port) pair not listed below is refused by
-# the sandbox's egress proxy. There is no "defaultAction" key — deny is
-# implicit. Unknown keys are a hard error.
+# Default-deny is implicit: there is no "defaultAction" key. Any
+# (binary, host:port) pair not listed is refused by the sandbox egress proxy.
+# Unknown keys are a hard error.
 #
-# With the CLI:  openshell sandbox create --from jaga-sandbox:local \
-#                  --policy hermes/openshell-policy.yaml -- <cmd>
-# Without the CLI (what we did): hermes/openshell_run.py loads this file and
-# maps it onto the SandboxPolicy protobuf for the Python SDK.
+# Keys: NEBIUS_API_KEY / TAVILY_API_KEY are NOT put in the sandbox. They live in
+# gateway-side providers (jaga-nebius-token-factory, jaga-tavily) whose profiles
+# bind them to exactly these hosts; the sandbox only sees
+# `openshell:resolve:env:...` placeholders, which the proxy swaps for the real
+# bearer token on the wire (needs protocol: rest = TLS termination + L7).
+#
+# Applied by hermes/setup_nemohermes.sh via the Python SDK (no CLI was
+# available). With the CLI it would be:
+#   openshell sandbox create --from jaga-sandbox:local --policy hermes/openshell-policy.yaml \
+#     --provider jaga-nebius-token-factory --provider jaga-tavily -- sleep infinity
+#   (CLI form untested.)
 version: 1
 
 filesystem_policy:
@@ -29,7 +37,9 @@ network_policies:
     endpoints:
       - host: api.tokenfactory.nebius.com
         port: 443
-        tls: skip
+        protocol: rest
+        access: read-write
+        enforcement: enforce
     binaries: &jaga_bins
       - path: /usr/bin/python3.12
       - path: /usr/bin/curl      # only for the smoke test in OPENSHELL_RUN.md
@@ -37,11 +47,15 @@ network_policies:
     endpoints:
       - host: api.tavily.com
         port: 443
-        tls: skip
+        protocol: rest
+        access: read-write
+        enforcement: enforce
     binaries: *jaga_bins
   telegram:                      # senior + guardian messaging
     endpoints:
       - host: api.telegram.org
         port: 443
-        tls: skip
+        protocol: rest
+        access: read-write
+        enforcement: enforce
     binaries: *jaga_bins
