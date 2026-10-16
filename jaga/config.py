@@ -113,7 +113,10 @@ class RunOptions:
     """Per-case switches. The eval harness flips these for ablations."""
     use_tavily: bool = True
     use_ledger: bool = True
-    tier: str = "full"          # "fast" | "plan" | "full"  (full = plan + escalation)
+    # Default tier chosen from ScamBench-MY: "plan" (Lightning triage + Super plan/verdict +
+    # Tavily + memory) matched "full" (+ Nemotron 3 Ultra second opinion) on accuracy at
+    # ~15% lower cost, so Ultra is opt-in via JAGA_TIER=full.
+    tier: str = field(default_factory=lambda: os.environ.get("JAGA_TIER", "plan"))  # "fast" | "plan" | "full"
     household_id: str = DEMO_HOUSEHOLD
     notify: bool = True
     extra: dict = field(default_factory=dict)

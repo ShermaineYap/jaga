@@ -18,7 +18,7 @@ already active with a $25 balance plus a $1 / 6-day trial → *Get API key* → 
 `base_url=https://api.tokenfactory.nebius.com/v1/`. Smoothest onboarding of any provider we used.
 
 **What worked**
-- Price/performance: the full three-tier pipeline costs **$[fill]/1,000 messages**; the Malay smoke
+- Price/performance: the default pipeline (Lightning + Super + Tavily) costs **$2.18 per 1,000 messages** of inference; the Malay smoke
   test (20 messages × 2 models) cost **$0.0044**.
 - `chat_template_kwargs: {"enable_thinking": false}` passes through and works on Lightning/Super;
   Super returns its reasoning separately in `reasoning_content`, so content stays clean JSON.
@@ -51,7 +51,10 @@ already active with a $25 balance plus a $1 / 6-day trial → *Get API key* → 
    the Nemotron marketing page still listed Nano Omni when we started. The new Super VL filled the
    vision gap for us, but there is still **no speech model**, and voice notes are how Malaysian seniors
    actually forward things. A `deprecations` field on `/v1/models` would let clients degrade gracefully.
-7. **Fine-tuning claim mismatch.** The Nemotron product page advertises serverless fine-tuning;
+7. **Usage dashboard lag.** After ~2,000 live calls the Usage page still showed "< $0.01" with
+   "Last updated 08:04 UTC" hours later, so we relied on our own token accounting. Near-real-time usage
+   (or per-key usage) would make budgeting a hackathon much safer.
+8. **Fine-tuning claim mismatch.** The Nemotron product page advertises serverless fine-tuning;
    the post-training docs' base-model list contains no Nemotron.
 
 **Would we build on it again?** Yes. The three-tier Nemotron routing is only economical because of
@@ -68,7 +71,7 @@ per-second CPU pricing, we would have hosted the whole agent on Nebius.
 
 **What we used.** `/search` with `include_domains` (SC, PDRM, BNM, MCMC, NSRC) and
 `include_raw_content`; `/search` with `topic=news`; `/extract` to read alert pages; `/map` for the
-nightly cache. ~[fill] credits over the build.
+nightly cache. **3,184 credits** over the build (1,837 unique searches, 1,215 of them `advanced`), well inside the 8,000-credit hackathon coupon thanks to a 24 h response cache.
 
 **What worked**
 - **Freshness is real:** "RRJ Pro" was added to the Securities Commission Investor Alert List on
@@ -89,13 +92,40 @@ nightly cache. ~[fill] credits over the build.
 
 ## 4. NVIDIA OpenShell / NemoClaw / Hermes Agent
 
-[fill from hermes/OPENSHELL_RUN.md — friction log]
+**What we used.** The published gateway image `ghcr.io/nvidia/openshell/gateway` with the Docker compute
+driver and the `openshell` 0.1.4 Python SDK. Jaga's case pipeline ran inside a sandbox under a
+default-deny egress policy; the Nebius and Tavily keys were registered as gateway providers, so the
+sandbox only saw `openshell:resolve:env:…` placeholders, `example.com` was refused, and the supervisor's
+OCSF log showed every allowed call matched to its provider policy. Full evidence and a 12-item friction
+log: `hermes/OPENSHELL_RUN.md`.
+
+**What worked.** The core promise — credentials that never enter the sandbox, injected only for the
+right host — worked exactly as described, and an exfiltration attempt (sending the placeholder to
+another allow-listed host) got `403 credential_endpoint_mismatch`. The OCSF log is genuinely useful.
+About 20 minutes from image pull to a sandboxed live verdict.
+
+**Most valuable fixes (from the friction log)**
+1. No way to get the CLI where GitHub release downloads are blocked, and the SDK cannot load a policy
+   from YAML — ship `openshell.policy.from_yaml()` and a `ghcr.io/nvidia/openshell/cli` image.
+2. The SDK has no provider/profile API; we had to call the private gRPC stub.
+3. `CreateProvider` says the profile "was not found in the requested scope" right after a successful
+   workspace-scoped import, until `profile_workspace` is set — the error should say so.
+4. Upstream TLS failures appear only as `NET:FAIL` with no reason; behind a TLS-intercepting proxy the
+   Docker driver has no `additional_ca_bundle` (Podman has), so we rebuilt the supervisor image.
+5. Rebuilding an image under a running gateway yields `SandboxError: … entered error phase` with no
+   reason (the gateway had pinned an image ID).
+
+**NemoClaw / Hermes Agent.** We could not run the `nemohermes` onboarding: the `nemoclaw` packages on
+PyPI and npm are empty placeholders with no CLI. Jaga ships its Hermes skill and tools (`hermes/`), but
+that path is untested under OpenShell. A published CLI (or container) would let personal-AI entrants
+use the full stack the track describes.
 
 ## 5. NVIDIA Nemotron (models)
 
-- Tiering works and the evaluation shows why: Lightning alone recalls [fill]% of scams but flags
-  [fill]% of legitimate messages; adding Super planning + Tavily verification brings false positives
-  to [fill]% at [fill] cost. Ultra was invoked on [fill]% of cases.
+- Tiering works and the evaluation shows why: Lightning alone recalls 98.7% of scams but flags 22.7%
+  of legitimate messages; adding Super planning + Tavily verification brings false positives to 10.0%
+  at the same recall, for $2.18 per 1,000 messages. Ultra, invoked as a second opinion on about 13% of
+  cases, added no measurable accuracy at +15% cost — so it is opt-in.
 - Super with reasoning on follows rules literally: told "never plan a check for an entity not in the
   triage", it planned *zero* checks when triage had missed the entity. Instructions need to be phrased
   as goals, with code-level floors underneath.

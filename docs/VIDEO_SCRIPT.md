@@ -19,13 +19,12 @@ Recording). Edit in CapCut / iMovie: cut the clips to the timings below.
 | 1:05–1:20 | `01_rrj_pro` — evidence card with SC link + quote (zoom on it) | "And here's the point: RRJ Pro was added to the SC Investor Alert List **yesterday**. No model's training data knows that. Jaga found the page and quotes it. Every piece of evidence is checked in code — the model can't invent a source." |
 | 1:20–1:35 | `03_screenshot` — upload, verdict, visual cues | "Most seniors forward screenshots, so **Nemotron 3.5 Super VL** reads them — and it noticed on its own that 'Maybank Customer Care' was using a personal mobile number." |
 | 1:35–1:50 | `02_trusted` — Faizal message → green, "known insurance agent in household memory" | "A guardian that cries wolf gets switched off. Mum's real insurance agent is in Jaga's household memory, so his reminder is cleared — with advice to call back on the saved number." |
-| 1:50–2:15 | `eval/results/chart_f1_fpr.png` (full screen) | "We measured it on ScamBench-MY: 300 Malay, English and Manglish messages we labelled. Lightning alone catches [fill]% of scams but wrongly flags [fill]% of real messages. Adding Super's planning and Tavily verification brings false alarms down to [fill]%, at about [fill] US cents per thousand messages." |
+| 1:50–2:15 | `eval/results/chart_f1_fpr.png` (full screen) | "We measured it on ScamBench-MY: 300 Malay, English and Manglish messages I labelled. Lightning alone catches 98.7% of scams — but wrongly flags 23% of real messages. Adding Super's planning and verification cuts false alarms to 10%, at about two US dollars per thousand messages. And on a test of messages from family and agents, household memory meant zero genuine messages were flagged, while every impersonation was caught." |
 | 2:15–2:35 | `04_memory_policy_audit` — policy, audit timeline | "Privacy is enforced, not promised: the family gets a summary, never the message. Every model call, search and notification is in an audit log they can read, export or delete. The private deployment runs as Hermes Agent inside **NVIDIA OpenShell** with a default-deny network." |
 | 2:35–2:50 | You on camera | "Next: voice notes, a Jetson at home for fully local triage, and a pilot with a residents' association. Jaga — it verifies before it warns." |
 | 2:50 | End card: `github.com/ShermaineYap/jaga` · "NVIDIA Nemotron · Nebius Token Factory · Tavily" | — |
 
 ### Checklist
-- [ ] Replace every [fill] with the numbers in `eval/results/RESULTS.md` (or keep the sentence general)
 - [ ] Mention OpenShell only as described in `hermes/OPENSHELL_RUN.md` (what actually ran)
 - [ ] No copyrighted music (YouTube Audio Library is fine); no real people's phone numbers on screen
 - [ ] Under 2:55; 1080p; upload to YouTube as **Public**; repo link in the description

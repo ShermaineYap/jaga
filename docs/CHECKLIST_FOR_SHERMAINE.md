@@ -1,54 +1,39 @@
-# What only you can do — in order
+# What's left — only the things that need you
 
-Everything in this repo runs offline today (`make test`, `make eval-mock`, `make demo`,
-`make dashboard`). The steps below need your identity, your card, or your voice.
-Deadline: **Oct 30, 10:00 PDT = Oct 31, 01:00 Malaysia time.** Submit on Oct 29.
+Deadline: **Oct 30, 10:00 PDT = Oct 31, 01:00 Malaysia time.** Aim to submit on **Oct 29**.
 
-## Day 1 — accounts (≈ 45 min)
-1. **Nebius Token Factory**: sign up, add a card, redeem `NEBIUS-DEVPOST-GLOBAL26` via the promo form
-   (link on the Devpost Resources page). Create an API key → `NEBIUS_API_KEY` in `.env`.
-2. **Nebius Builders Program** (dev.nebius.com/builders): join for the second $25 + Tavily credit.
-3. **Tavily**: create an account at tavily.com, apply code `BBDEVPOST` if the form accepts it →
-   `TAVILY_API_KEY`.
-4. **Telegram bot**: message @BotFather → `/newbot` → `TELEGRAM_BOT_TOKEN`. Create a second Telegram
-   account (or use a friend's) to play the "daughter".
-5. **Join the Nebius Discord** (link on Devpost Resources) — that is where billing/credit issues get fixed.
-6. **GitHub**: create a public repo `jaga`, push this folder (`git init && git add -A && git commit
-   -m "Jaga" && git push`). Confirm the MIT license shows in the repo's About box.
-7. On Devpost: **Start a submission** now (you can edit until the deadline).
+Everything else is done: code on GitHub, live demo on Render, Telegram bot live, 300-message
+evaluation run on real Nemotron, OpenShell sandbox verified, Devpost draft filled up to the Submit page.
 
-## Day 1 — ten-minute checks
-```bash
-pip install -r requirements.txt
-python scripts/list_models.py     # do the three Nemotron IDs resolve? If not, fix .env
-python scripts/malay_smoke.py     # does Nemotron handle BM? decides the demo language
-python scripts/seed_demo.py       # three live cases
-uvicorn jaga.dashboard.app:app --port 8000
-```
-Then run the full eval (≈ $1–3): `make eval && make charts`. Paste the numbers into
-`README.md`, `docs/DEVPOST_SUBMISSION.md` and `docs/FEEDBACK.md` where it says `[fill]`.
+## 1. Record the video (≈ 1–2 hours)
+- Script: `docs/VIDEO_SCRIPT.md` (timings + lines, numbers already filled in).
+- Footage already recorded for you: `NEBIUS X NVIDIA/video_footage/` (4 clips, real models).
+- You record: a 10-second intro and outro on camera, and a 15-second phone screen recording of
+  forwarding a message to **@Jaga_my_demo_bot** (use `video_footage/demo_scam_screenshot_to_forward.jpg`,
+  or any real scam SMS you've received).
+- Voice-over in **your own voice**. Under 2:55. Edit in CapCut or iMovie.
+- Upload to YouTube as **Public**; put `https://github.com/ShermaineYap/jaga` in the description.
 
-## Days 2–8 — the OpenShell deployment (budget two days for friction)
-- A Linux VM with Docker. Cheapest honest options: a Nebius AI Cloud CPU VM (needs the $25 AI
-  Cloud top-up — then the README can say "runs end to end on Nebius"), or any small VPS, or WSL2.
-- `bash hermes/setup_nemohermes.sh`. **Write down every error** in `docs/FEEDBACK.md` — that is
-  the Most Valuable Feedback prize.
-- If NemoClaw won't cooperate after two days: run `python -m jaga.bot` + the dashboard with
-  `docker compose up -d`, and describe honestly in the README that the OpenShell layer is
-  configured but was not the deployed path. Judges reward honesty over a broken claim.
+## 2. Finish the Devpost draft (≈ 10 minutes)
+Open devpost.com → My projects → *Jaga: a scam guardian that verifies before it warns* → Edit.
+- **Project details:** paste the YouTube link into *Demo video URL*.
+- **Additional info** — these are yours to answer (I filled everything factual):
+  - the three 1–10 ratings (Nemotron output quality; likelihood to recommend; experience vs other
+    environments) — your honest opinion;
+  - *Did you attend Builders & Brews?* (only if you went to the KL event on 12 Sep);
+  - *level of learning* and *AI value for your career*;
+  - the two declarations: you're at least 18, and not an employee/agent of Nebius, NVIDIA, Tavily or Devpost.
+- **Submit page:** read the Official Rules, tick the terms box, click **Submit project**.
+  You can still edit after submitting, until the deadline.
 
-## Days 9–12 — demo + polish
-- Keep the dashboard reachable **until Dec 15** (judging). Put $5–10 of real balance on Token
-  Factory for the judging window; credits may expire before then.
-- Ask two or three seniors/family members to try it; put one real quote in the README.
-- `python scripts/malaymmlu_subset.py --n 500` (needs `pip install datasets`).
+## 3. Keep the demo alive until Dec 15 (judging)
+- Token Factory: $25 balance; the build and all evaluations used roughly $7 (the usage page lags by
+  several hours). Check it once in December. A full re-run of the evaluation costs about $3.
+- The free Render instance sleeps when idle; the first visit takes ~50 s. That's fine for judges.
+- Tavily: 3,184 of 9,000 credits used on 16 Oct (≈ 5,800 left).
 
-## Day 13 — video
-- Follow `docs/VIDEO_SCRIPT.md`. Your voice. Under 2:55. Public YouTube.
-- Make a 30-second GIF of the forward → verdict → guardian summary for the README (`docs/demo.gif`).
-
-## Day 14 — submit (Oct 29)
-- Devpost: paste `docs/DEVPOST_SUBMISSION.md`; choose track **Personal AI**; paste `docs/FEEDBACK.md`
-  into the feedback field; demo URL + test credentials in private notes; video link; repo link.
-- Have two friends read the README and watch the video cold. Fix what confused them.
-- Submit. Oct 30 is buffer only.
+## 4. Housekeeping
+- Delete `NEBIUS X NVIDIA/jaga_sync.tgz` — it contains a copy of your `.env` keys.
+- The GitHub access token `jaga-hackathon-push` (expires Nov 15) is no longer needed; you can
+  revoke it at github.com/settings/personal-access-tokens.
+- Optional: ask 2–3 seniors or family members to try the Telegram bot and add one real quote to the README.
