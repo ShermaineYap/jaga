@@ -65,8 +65,8 @@ SEED_CONTACTS = [
 ]
 
 
-def load(limit: int | None) -> list[dict]:
-    rows = [json.loads(l) for l in DATA.read_text().splitlines() if l.strip()]
+def load(limit: int | None, data: Path = DATA) -> list[dict]:
+    rows = [json.loads(l) for l in data.read_text().splitlines() if l.strip()]
     return rows[:limit] if limit else rows
 
 
@@ -213,9 +213,11 @@ def main() -> None:
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--mock", action="store_true", help="force heuristics for every config (offline)")
     ap.add_argument("--batch-prepare", action="store_true")
+    ap.add_argument("--data", default=str(DATA), help="JSONL dataset (default ScamBench-MY)")
+    ap.add_argument("--tag", default="", help="suffix for result files, e.g. 'memory'")
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
-    rows = load(args.limit)
+    rows = load(args.limit, Path(args.data))
     if args.batch_prepare:
         print("wrote", batch_prepare(rows))
         return
@@ -227,9 +229,10 @@ def main() -> None:
         all_preds[name] = preds
         print(json.dumps({k: m[k] for k in ("f1", "precision", "recall", "false_positive_rate", "cost_usd_per_1000", "median_latency_ms")}))
     stamp = time.strftime("%Y%m%d-%H%M%S")
-    (OUT / f"results_{stamp}.json").write_text(json.dumps({"results": results, "predictions": all_preds}, indent=1))
-    (OUT / "latest.json").write_text(json.dumps({"results": results, "predictions": all_preds}, indent=1))
-    (OUT / "RESULTS.md").write_text(f"# ScamBench-MY results ({stamp})\n\nn = {len(rows)} messages. "
+    sfx = f"_{args.tag}" if args.tag else ""
+    (OUT / f"results_{stamp}{sfx}.json").write_text(json.dumps({"results": results, "predictions": all_preds}, indent=1))
+    (OUT / f"latest{sfx}.json").write_text(json.dumps({"results": results, "predictions": all_preds}, indent=1))
+    (OUT / f"RESULTS{sfx}.md").write_text(f"# ScamBench-MY results ({stamp})\n\nn = {len(rows)} messages. "
                                     f"mock={args.mock}\n\n" + to_markdown(results))
     print("\n" + to_markdown(results))
     print(f"\nwritten to {OUT}")
