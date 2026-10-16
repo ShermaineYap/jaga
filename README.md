@@ -27,7 +27,7 @@ No model's training data contains that fact; a verifying agent finds it.
 | Layer | What Jaga does with it | Why it's load-bearing |
 |---|---|---|
 | **Nemotron 3.5 Lightning** `nvidia/Nemotron-3_5-Lightning` on **Nebius Token Factory** | Triage of every message, **thinking off**, JSON-schema structured output: scam family, entities (schemes, phones, links, accounts), urgency cues | Cheap, fast tier for the step that runs on every message |
-| **Nemotron 3 Super** `nvidia/nemotron-3-super-120b-a12b` | **Thinking on, budgeted.** Plans what to verify (entity → tool → query), then writes the bilingual verdict from *verified facts only* | The judgment step. Halves false alarms vs Lightning alone (see Results) |
+| **Nemotron 3 Super** `nvidia/nemotron-3-super-120b-a12b` | **Thinking on, budgeted.** Plans what to verify (entity → tool → query), then writes the bilingual verdict from *verified facts only* | The judgment step. Cuts false alarms by more than half vs Lightning alone (see Results) |
 | **Nemotron 3.5 Super VL** `nvidia/Nemotron-3.5-Super-VL` | Reads forwarded **screenshots**: transcribes the message, the sender as displayed, and visual red flags | Seniors forward screenshots; VL spotted "Maybank Customer Care" on a personal +60 11 number unprompted |
 | **Nemotron 3 Ultra** `nvidia/Nemotron-3-Ultra-550b-a55b` | Optional second opinion on money-involved, ambiguous cases (`JAGA_TIER=full`) | Evaluated honestly: no measurable gain on ScamBench-MY at +15% cost, so opt-in |
 | **Tavily** search (`include_domains`, `include_raw_content`), news, extract, map | Model-chosen lookups restricted to SC / PDRM / BNM / MCMC / NSRC; nightly map→extract cache; 24 h response cache | Freshness: the RRJ Pro alert was one day old |
@@ -48,36 +48,40 @@ for money). 40% Bahasa Malaysia, 35% English, 25% Manglish. All live runs on Neb
 | Configuration | F1 | Scams caught | False alarms on legit | USD / 1,000 msgs |
 |---|---|---|---|---|
 | Keyword rules (no model) | 0.763 | 76.0% | 23.3% | — |
-| Nemotron 3.5 Lightning only | 0.892 | 98.7% | 22.7% | $0.18 |
-| **Default: Lightning + Super + Tavily + memory** | **0.946** | **98.7%** | **10.0%** | **$2.18** |
-| Default + Nemotron 3 Ultra second opinion | 0.936 | 97.3% | 10.7% | $2.51 |
-| … + Ultra, without Tavily | 0.955 | 98.7% | 8.0% | $2.55 |
-| … + Ultra, without household memory | 0.955 | 99.3% | 8.7% | $2.51 |
+| Nemotron 3.5 Lightning only | 0.887 | 99.3% | 24.7% | $0.18 |
+| **Default: Lightning + Super + Tavily + memory** | **0.939** | **98.0%** | **10.7%** | **$2.20** |
+| Default without household memory | 0.940 | 98.7% | 11.3% | $2.10 |
+| + Nemotron 3 Ultra second opinion ¹ | 0.936 | 97.3% | 10.7% | $2.51 |
+| + Ultra, without Tavily ¹ | 0.955 | 98.7% | 8.0% | $2.55 |
+
+¹ measured on an earlier build the same day (before the final verification guards); the default
+tier moved from F1 0.946 to 0.939 across those guards, well within its confidence interval.
 
 **What the numbers say** (95% paired-bootstrap CIs in [eval/results/CI.md](eval/results/CI.md)):
 
-* **Tiering works.** Adding Super's planning and verdict to Lightning **halves false alarms**
-  (22.7% → 10.0%) at the same recall: ΔF1 +0.054 [+0.025, +0.089], ΔFPR −12.7 pts [−19.9, −6.0].
-  Lightning alone is an excellent detector but too jumpy to trust with a senior's phone.
-* **Ultra didn't earn its cost here** (ΔF1 −0.010 [−0.033, +0.013]), so it's opt-in rather than default.
+* **Tiering works.** Adding Super's planning and verdict to Lightning **cuts false alarms by more
+  than half** (24.7% → 10.7%) at near-identical recall: ΔF1 +0.052 [+0.021, +0.086],
+  ΔFPR −14.0 pts [−21.2, −7.1]. Lightning alone is an excellent detector but too jumpy to trust with
+  a senior's phone.
+* **Ultra didn't earn its cost here** (ΔF1 −0.003 [−0.027, +0.019]), so it's opt-in, not default.
 * **Tavily and memory don't move aggregate F1 on ScamBench-MY — by design of the benchmark.** Its
   scam names and numbers are fictional, so no official list contains them, and none of its messages
   come from the household's saved contacts. Their value shows where the benchmark can't: real,
   newly-listed entities (RRJ Pro, cited above) and known contacts —
 
-**Memory test** (`eval/data/memory_set.jsonl`, 20 messages): 10 genuine, urgent-sounding messages
-from saved contacts (daughter, insurance agent, doctor) and 10 impersonations of the *same people*
-from new numbers ("Mum, it's Siti, new number…").
+**Memory test** (`eval/data/memory_set.jsonl`, 20 messages, run 3 times per configuration): 10
+genuine, urgent-sounding messages from saved contacts (daughter, insurance agent, doctor) and 10
+impersonations of the *same people* from new numbers ("Mum, it's Siti, new number…").
 
 | Configuration | Impersonations caught | Genuine messages wrongly flagged |
 |---|---|---|
-| Lightning only | 10 / 10 | 2 / 10 |
-| default **without** memory | 10 / 10 | 3 / 10 |
-| **default with memory** | **10 / 10** | **0 / 10** |
+| Lightning only | 30 / 30 | 6 / 30 |
+| Default **without** memory | 29 / 30 | 4 / 30 |
+| **Default with memory** | **30 / 30** | **0 / 30** |
 
-Small sample — directional, not proof. It also caught a real bug: an earlier version trusted a
-contact's *name*, which cleared "Mum, it's Siti, new number". Trust now requires the saved number,
-and a saved name from an unsaved number is itself a red flag (`tests/test_pipeline.py`).
+Building this test caught a real bug: an earlier version trusted a contact's *name*, which cleared
+"Mum, it's Siti, new number". Trust now requires the saved number, and "claims to be a saved contact +
+unsaved number + asks for money" is always high risk, by rule (`tests/test_pipeline.py`).
 
 ---
 
@@ -105,8 +109,9 @@ Engineering details judges may care about, each found by live testing and fixed 
   every schema is sent with all properties `required` and bounded `maxItems`/`maxLength`
   (`jaga/llm.py:strict_schema`). Bounded lists also stopped a repetition loop in Lightning.
 * **No invented sources.** The model once cited a real Bank Negara page for a phone number that isn't
-  on it. Web evidence is now rebuilt solely from deterministic tool hits, and the verdict model only
-  sees verified facts (`jaga/pipeline.py:_enforce_policy`, regression test included).
+  on it, and once "verified" the generic word *phone* against an SC page. Web evidence is now rebuilt
+  solely from deterministic hits on concrete extracted entities, the verdict model only sees verified
+  facts, and a headline can't claim a list match without one (`jaga/pipeline.py`, regression tests).
 * **Degradation.** Model fallback chains (404/429), a "paused" state on HTTP 402, a 24 h search cache,
   `JAGA_MOCK=1` offline mode for tests and a recorded-run fallback.
 
@@ -123,7 +128,7 @@ Sources: Home Ministry parliamentary reply via
 [Malay Mail](https://www.malaymail.com/amp/news/malaysia/2026/06/24/online-scam-losses-surge-to-rm297b-in-2025-says-home-ministry-as-fraud-trend-worsens-across-malaysia/225000);
 Bukit Aman via [The Sun](https://thesun.my/malaysia-news/1916-elderly-victims-fall-prey-to-online-scams-losing-over-rm250-million-this-year-JH13053183);
 NHMS 2025 via [Malay Mail](https://www.malaymail.com/news/life/2026/10/12/malaysias-ageing-population-raises-alarm-over-lonely-deaths-how-does-smart-tech-help/238728).
-At $2.18 per 1,000 messages, a household forwarding 20 messages a month costs about US$0.50
+At $2.20 per 1,000 messages, a household forwarding 20 messages a month costs about US$0.50
 (≈ RM2.30) a year in inference. Jaga is decision support: it never says "safe" and always points high-risk cases to
 **NSRC 997**.
 
@@ -164,7 +169,7 @@ uvicorn jaga.dashboard.app:app --port 8000
 python -m jaga.bot                   # Telegram gateway
 ```
 
-No keys? `JAGA_MOCK=1` runs everything offline. `make test` runs 11 tests.
+No keys? `JAGA_MOCK=1` runs everything offline. `make test` runs 14 tests.
 Evaluation: `python eval/run_eval.py` (≈ $3 of Token Factory credit for all configurations),
 `python eval/bootstrap.py`, `python eval/charts.py`.
 Deploy: `render.yaml` (one-click Blueprint) or `docker compose up -d`.

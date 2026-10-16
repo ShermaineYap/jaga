@@ -18,7 +18,7 @@ already active with a $25 balance plus a $1 / 6-day trial → *Get API key* → 
 `base_url=https://api.tokenfactory.nebius.com/v1/`. Smoothest onboarding of any provider we used.
 
 **What worked**
-- Price/performance: the default pipeline (Lightning + Super + Tavily) costs **$2.18 per 1,000 messages** of inference; the Malay smoke
+- Price/performance: the default pipeline (Lightning + Super + Tavily) costs **$2.20 per 1,000 messages** of inference; the Malay smoke
   test (20 messages × 2 models) cost **$0.0044**.
 - `chat_template_kwargs: {"enable_thinking": false}` passes through and works on Lightning/Super;
   Super returns its reasoning separately in `reasoning_content`, so content stays clean JSON.
@@ -122,9 +122,9 @@ use the full stack the track describes.
 
 ## 5. NVIDIA Nemotron (models)
 
-- Tiering works and the evaluation shows why: Lightning alone recalls 98.7% of scams but flags 22.7%
-  of legitimate messages; adding Super planning + Tavily verification brings false positives to 10.0%
-  at the same recall, for $2.18 per 1,000 messages. Ultra, invoked as a second opinion on about 13% of
+- Tiering works and the evaluation shows why: Lightning alone recalls 99.3% of scams but flags 24.7%
+  of legitimate messages; adding Super planning + Tavily verification brings false positives to 10.7%
+  at 98.0% recall, for $2.20 per 1,000 messages. Ultra, invoked as a second opinion on about 13% of
   cases, added no measurable accuracy at +15% cost — so it is opt-in.
 - Super with reasoning on follows rules literally: told "never plan a check for an entity not in the
   triage", it planned *zero* checks when triage had missed the entity. Instructions need to be phrased

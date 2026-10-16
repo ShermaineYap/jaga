@@ -63,7 +63,7 @@ def main() -> None:
         f1, fpr = f1_fpr(labels, flags[c])
         (a, b), (x, y) = ci([t[0] for t in boots[c]]), ci([t[1] for t in boots[c]])
         lines.append(f"| {c} | {f1:.3f} | {a:.3f}–{b:.3f} | {fpr:.1%} | {x:.1%}–{y:.1%} |")
-    pairs = [("plan", "fast"), ("plan", "rules"), ("full", "plan"), ("full", "no_tavily"), ("full", "no_ledger")]
+    pairs = [("plan", "fast"), ("plan", "rules"), ("plan", "plan_no_ledger"), ("full", "plan"), ("full", "no_tavily")]
     lines += ["", "**Paired differences (A − B).** Significant if the 95% CI excludes 0.", "",
               "| comparison | ΔF1 | 95% CI | ΔFPR | 95% CI |", "|---|---|---|---|---|"]
     for a_, b_ in pairs:

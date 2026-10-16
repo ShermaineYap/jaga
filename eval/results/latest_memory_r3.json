@@ -3,14 +3,14 @@
   {
    "n": 20,
    "tp": 10,
-   "fp": 3,
+   "fp": 2,
    "fn": 0,
-   "tn": 7,
-   "precision": 0.769,
+   "tn": 8,
+   "precision": 0.833,
    "recall": 1.0,
-   "f1": 0.87,
-   "false_positive_rate": 0.3,
-   "fpr_hard_negatives": 0.3,
+   "f1": 0.909,
+   "false_positive_rate": 0.2,
+   "fpr_hard_negatives": 0.2,
    "fpr_easy_negatives": null,
    "family_accuracy_on_scams": 0.3,
    "recall_by_family": {
@@ -20,11 +20,11 @@
    "f1_by_language": {
     "en": 0.857,
     "manglish": 1.0,
-    "ms": 0.833
+    "ms": 0.909
    },
-   "median_latency_ms": 10354,
-   "p90_latency_ms": 13290,
-   "cost_usd_total": 0.0041,
+   "median_latency_ms": 9775,
+   "p90_latency_ms": 12002,
+   "cost_usd_total": 0.004,
    "cost_usd_per_1000": 0.2,
    "escalations": 0,
    "tool_hits": 0,
@@ -35,32 +35,32 @@
   },
   {
    "n": 20,
-   "tp": 9,
+   "tp": 10,
    "fp": 0,
-   "fn": 1,
+   "fn": 0,
    "tn": 10,
    "precision": 1.0,
-   "recall": 0.9,
-   "f1": 0.947,
+   "recall": 1.0,
+   "f1": 1.0,
    "false_positive_rate": 0.0,
    "fpr_hard_negatives": 0.0,
    "fpr_easy_negatives": null,
    "family_accuracy_on_scams": 0.3,
    "recall_by_family": {
-    "impersonation": 0.875,
+    "impersonation": 1.0,
     "investment": 1.0
    },
    "f1_by_language": {
-    "en": 0.8,
+    "en": 1.0,
     "manglish": 1.0,
     "ms": 1.0
    },
-   "median_latency_ms": 30489,
-   "p90_latency_ms": 37256,
-   "cost_usd_total": 0.0481,
-   "cost_usd_per_1000": 2.4,
+   "median_latency_ms": 15406,
+   "p90_latency_ms": 22019,
+   "cost_usd_total": 0.0455,
+   "cost_usd_per_1000": 2.27,
    "escalations": 0,
-   "tool_hits": 2,
+   "tool_hits": 3,
    "tool_errors": 0,
    "config": "plan",
    "mock": false,
@@ -78,7 +78,7 @@
    "false_positive_rate": 0.0,
    "fpr_hard_negatives": 0.0,
    "fpr_easy_negatives": null,
-   "family_accuracy_on_scams": 0.4,
+   "family_accuracy_on_scams": 0.5,
    "recall_by_family": {
     "impersonation": 1.0,
     "investment": 1.0
@@ -88,14 +88,14 @@
     "manglish": 1.0,
     "ms": 1.0
    },
-   "median_latency_ms": 20080,
-   "p90_latency_ms": 25604,
-   "cost_usd_total": 0.0601,
-   "cost_usd_per_1000": 3.0,
-   "escalations": 4,
-   "tool_hits": 5,
+   "median_latency_ms": 16127,
+   "p90_latency_ms": 21009,
+   "cost_usd_total": 0.0487,
+   "cost_usd_per_1000": 2.43,
+   "escalations": 0,
+   "tool_hits": 2,
    "tool_errors": 0,
-   "config": "no_ledger",
+   "config": "plan_no_ledger",
    "mock": false,
    "errors": 0
   }
@@ -104,10 +104,10 @@
   "fast": [
    {
     "id": "mem-01",
-    "risk": "medium",
-    "family": "impersonation",
-    "latency_ms": 9254,
-    "cost_usd": 0.000187,
+    "risk": "high",
+    "family": "mule",
+    "latency_ms": 7680,
+    "cost_usd": 0.000169,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -117,10 +117,10 @@
    },
    {
     "id": "mem-02",
-    "risk": "medium",
+    "risk": "high",
     "family": "mule",
-    "latency_ms": 8371,
-    "cost_usd": 0.000175,
+    "latency_ms": 8818,
+    "cost_usd": 0.000188,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -130,10 +130,10 @@
    },
    {
     "id": "mem-03",
-    "risk": "medium",
-    "family": "mule",
-    "latency_ms": 9200,
-    "cost_usd": 0.000172,
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 9103,
+    "cost_usd": 0.000186,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -145,8 +145,8 @@
     "id": "mem-04",
     "risk": "low",
     "family": "legit",
-    "latency_ms": 8947,
-    "cost_usd": 0.000167,
+    "latency_ms": 9651,
+    "cost_usd": 0.000183,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -158,8 +158,8 @@
     "id": "mem-05",
     "risk": "low",
     "family": "legit",
-    "latency_ms": 6390,
-    "cost_usd": 0.000141,
+    "latency_ms": 7525,
+    "cost_usd": 0.000157,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -171,8 +171,8 @@
     "id": "mem-06",
     "risk": "low",
     "family": "legit",
-    "latency_ms": 6204,
-    "cost_usd": 0.000147,
+    "latency_ms": 6788,
+    "cost_usd": 0.000157,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -184,8 +184,8 @@
     "id": "mem-07",
     "risk": "low",
     "family": "legit",
-    "latency_ms": 7245,
-    "cost_usd": 0.000156,
+    "latency_ms": 7485,
+    "cost_usd": 0.000152,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -197,8 +197,8 @@
     "id": "mem-08",
     "risk": "low",
     "family": "legit",
-    "latency_ms": 7571,
-    "cost_usd": 0.000161,
+    "latency_ms": 7875,
+    "cost_usd": 0.000173,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -210,8 +210,8 @@
     "id": "mem-09",
     "risk": "low",
     "family": "legit",
-    "latency_ms": 7913,
-    "cost_usd": 0.000168,
+    "latency_ms": 9900,
+    "cost_usd": 0.000194,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -222,9 +222,9 @@
    {
     "id": "mem-10",
     "risk": "unknown",
-    "family": "mule",
-    "latency_ms": 6729,
-    "cost_usd": 0.000148,
+    "family": "love",
+    "latency_ms": 6701,
+    "cost_usd": 0.000145,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -236,8 +236,8 @@
     "id": "mem-11",
     "risk": "high",
     "family": "love",
-    "latency_ms": 13977,
-    "cost_usd": 0.000291,
+    "latency_ms": 10521,
+    "cost_usd": 0.000218,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -249,8 +249,8 @@
     "id": "mem-12",
     "risk": "high",
     "family": "mule",
-    "latency_ms": 13258,
-    "cost_usd": 0.000247,
+    "latency_ms": 11551,
+    "cost_usd": 0.000234,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -262,8 +262,8 @@
     "id": "mem-13",
     "risk": "high",
     "family": "mule",
-    "latency_ms": 11582,
-    "cost_usd": 0.000229,
+    "latency_ms": 10596,
+    "cost_usd": 0.000216,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -275,8 +275,8 @@
     "id": "mem-14",
     "risk": "high",
     "family": "investment",
-    "latency_ms": 11454,
-    "cost_usd": 0.000225,
+    "latency_ms": 12719,
+    "cost_usd": 0.000245,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -288,8 +288,8 @@
     "id": "mem-15",
     "risk": "high",
     "family": "impersonation",
-    "latency_ms": 11910,
-    "cost_usd": 0.000249,
+    "latency_ms": 11960,
+    "cost_usd": 0.000235,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -301,8 +301,8 @@
     "id": "mem-16",
     "risk": "high",
     "family": "phishing_otp",
-    "latency_ms": 13298,
-    "cost_usd": 0.000243,
+    "latency_ms": 12548,
+    "cost_usd": 0.00026,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -314,8 +314,8 @@
     "id": "mem-17",
     "risk": "high",
     "family": "investment",
-    "latency_ms": 13290,
-    "cost_usd": 0.00026,
+    "latency_ms": 12002,
+    "cost_usd": 0.000268,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -327,8 +327,8 @@
     "id": "mem-18",
     "risk": "high",
     "family": "investment",
-    "latency_ms": 12749,
-    "cost_usd": 0.000254,
+    "latency_ms": 10536,
+    "cost_usd": 0.000217,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -340,8 +340,8 @@
     "id": "mem-19",
     "risk": "high",
     "family": "mule",
-    "latency_ms": 12288,
-    "cost_usd": 0.000245,
+    "latency_ms": 10710,
+    "cost_usd": 0.000229,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -353,8 +353,8 @@
     "id": "mem-20",
     "risk": "high",
     "family": "mule",
-    "latency_ms": 11899,
-    "cost_usd": 0.000221,
+    "latency_ms": 8793,
+    "cost_usd": 0.000198,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -368,8 +368,8 @@
     "id": "mem-01",
     "risk": "low",
     "family": "legit",
-    "latency_ms": 29607,
-    "cost_usd": 0.002056,
+    "latency_ms": 13772,
+    "cost_usd": 0.001725,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -382,77 +382,7 @@
     "id": "mem-02",
     "risk": "low",
     "family": "legit",
-    "latency_ms": 18188,
-    "cost_usd": 0.001458,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-03",
-    "risk": "low",
-    "family": "legit",
-    "latency_ms": 20287,
-    "cost_usd": 0.0015,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-04",
-    "risk": "low",
-    "family": "legit",
-    "latency_ms": 29071,
-    "cost_usd": 0.001984,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-05",
-    "risk": "low",
-    "family": "legit",
-    "latency_ms": 27684,
-    "cost_usd": 0.001893,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-06",
-    "risk": "low",
-    "family": "legit",
-    "latency_ms": 25795,
-    "cost_usd": 0.001602,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-07",
-    "risk": "low",
-    "family": "legit",
-    "latency_ms": 18806,
+    "latency_ms": 11561,
     "cost_usd": 0.001484,
     "escalated": false,
     "tool_hit": false,
@@ -463,223 +393,11 @@
     "tool_errors": 0
    },
    {
-    "id": "mem-08",
-    "risk": "low",
-    "family": "legit",
-    "latency_ms": 21499,
-    "cost_usd": 0.001553,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-09",
-    "risk": "low",
-    "family": "legit",
-    "latency_ms": 21986,
-    "cost_usd": 0.001416,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-10",
-    "risk": "low",
-    "family": "mule",
-    "latency_ms": 16169,
-    "cost_usd": 0.001315,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-11",
-    "risk": "medium",
-    "family": "love",
-    "latency_ms": 35095,
-    "cost_usd": 0.002828,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-12",
-    "risk": "high",
-    "family": "love",
-    "latency_ms": 43363,
-    "cost_usd": 0.003776,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-13",
-    "risk": "high",
-    "family": "mule",
-    "latency_ms": 35213,
-    "cost_usd": 0.002799,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-14",
-    "risk": "medium",
-    "family": "investment",
-    "latency_ms": 34179,
-    "cost_usd": 0.002819,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-15",
-    "risk": "medium",
-    "family": "impersonation",
-    "latency_ms": 37256,
-    "cost_usd": 0.003214,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-16",
-    "risk": "high",
-    "family": "phishing_otp",
-    "latency_ms": 36397,
-    "cost_usd": 0.002893,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-17",
-    "risk": "high",
-    "family": "investment",
-    "latency_ms": 34790,
-    "cost_usd": 0.003169,
-    "escalated": false,
-    "tool_hit": true,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-18",
-    "risk": "high",
-    "family": "investment",
-    "latency_ms": 45779,
-    "cost_usd": 0.004199,
-    "escalated": false,
-    "tool_hit": true,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-19",
-    "risk": "medium",
-    "family": "mule",
-    "latency_ms": 31372,
-    "cost_usd": 0.003211,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-20",
-    "risk": "low",
-    "family": "legit",
-    "latency_ms": 31840,
-    "cost_usd": 0.00293,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   }
-  ],
-  "no_ledger": [
-   {
-    "id": "mem-01",
-    "risk": "low",
-    "family": "legit",
-    "latency_ms": 24232,
-    "cost_usd": 0.002588,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
-    "id": "mem-02",
-    "risk": "low",
-    "family": "legit",
-    "latency_ms": 23517,
-    "cost_usd": 0.002571,
-    "escalated": false,
-    "tool_hit": false,
-    "models": {
-     "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b"
-    },
-    "tool_errors": 0
-   },
-   {
     "id": "mem-03",
     "risk": "low",
     "family": "legit",
-    "latency_ms": 19429,
-    "cost_usd": 0.001823,
+    "latency_ms": 12459,
+    "cost_usd": 0.001575,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -692,8 +410,8 @@
     "id": "mem-04",
     "risk": "low",
     "family": "legit",
-    "latency_ms": 23906,
-    "cost_usd": 0.002538,
+    "latency_ms": 11171,
+    "cost_usd": 0.001321,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -706,8 +424,8 @@
     "id": "mem-05",
     "risk": "low",
     "family": "legit",
-    "latency_ms": 12608,
-    "cost_usd": 0.001735,
+    "latency_ms": 11114,
+    "cost_usd": 0.001411,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -720,8 +438,8 @@
     "id": "mem-06",
     "risk": "low",
     "family": "legit",
-    "latency_ms": 19104,
-    "cost_usd": 0.002116,
+    "latency_ms": 10304,
+    "cost_usd": 0.001257,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -734,10 +452,10 @@
     "id": "mem-07",
     "risk": "low",
     "family": "legit",
-    "latency_ms": 21744,
-    "cost_usd": 0.003008,
+    "latency_ms": 11137,
+    "cost_usd": 0.00142,
     "escalated": false,
-    "tool_hit": true,
+    "tool_hit": false,
     "models": {
      "fast": "nvidia/Nemotron-3_5-Lightning",
      "plan": "nvidia/nemotron-3-super-120b-a12b"
@@ -748,10 +466,10 @@
     "id": "mem-08",
     "risk": "low",
     "family": "legit",
-    "latency_ms": 27327,
-    "cost_usd": 0.002842,
+    "latency_ms": 13331,
+    "cost_usd": 0.00179,
     "escalated": false,
-    "tool_hit": true,
+    "tool_hit": false,
     "models": {
      "fast": "nvidia/Nemotron-3_5-Lightning",
      "plan": "nvidia/nemotron-3-super-120b-a12b"
@@ -762,8 +480,8 @@
     "id": "mem-09",
     "risk": "low",
     "family": "legit",
-    "latency_ms": 21437,
-    "cost_usd": 0.002207,
+    "latency_ms": 13191,
+    "cost_usd": 0.001718,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -776,8 +494,8 @@
     "id": "mem-10",
     "risk": "low",
     "family": "mule",
-    "latency_ms": 17131,
-    "cost_usd": 0.002405,
+    "latency_ms": 19977,
+    "cost_usd": 0.002575,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -790,14 +508,13 @@
     "id": "mem-11",
     "risk": "high",
     "family": "love",
-    "latency_ms": 25041,
-    "cost_usd": 0.005408,
-    "escalated": true,
+    "latency_ms": 22019,
+    "cost_usd": 0.003326,
+    "escalated": false,
     "tool_hit": false,
     "models": {
      "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b",
-     "escalate": "nvidia/Nemotron-3-Ultra-550b-a55b"
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
     },
     "tool_errors": 0
    },
@@ -805,8 +522,8 @@
     "id": "mem-12",
     "risk": "high",
     "family": "love",
-    "latency_ms": 13737,
-    "cost_usd": 0.00216,
+    "latency_ms": 17746,
+    "cost_usd": 0.002655,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -819,10 +536,10 @@
     "id": "mem-13",
     "risk": "high",
     "family": "mule",
-    "latency_ms": 16686,
-    "cost_usd": 0.002814,
+    "latency_ms": 24043,
+    "cost_usd": 0.003283,
     "escalated": false,
-    "tool_hit": true,
+    "tool_hit": false,
     "models": {
      "fast": "nvidia/Nemotron-3_5-Lightning",
      "plan": "nvidia/nemotron-3-super-120b-a12b"
@@ -832,30 +549,28 @@
    {
     "id": "mem-14",
     "risk": "high",
-    "family": "investment",
-    "latency_ms": 20731,
-    "cost_usd": 0.005869,
-    "escalated": true,
-    "tool_hit": false,
+    "family": "impersonation",
+    "latency_ms": 20810,
+    "cost_usd": 0.003443,
+    "escalated": false,
+    "tool_hit": true,
     "models": {
      "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b",
-     "escalate": "nvidia/Nemotron-3-Ultra-550b-a55b"
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
     },
     "tool_errors": 0
    },
    {
     "id": "mem-15",
-    "risk": "medium",
+    "risk": "high",
     "family": "impersonation",
-    "latency_ms": 27104,
-    "cost_usd": 0.004872,
-    "escalated": true,
+    "latency_ms": 20386,
+    "cost_usd": 0.002321,
+    "escalated": false,
     "tool_hit": false,
     "models": {
      "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b",
-     "escalate": "nvidia/Nemotron-3-Ultra-550b-a55b"
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
     },
     "tool_errors": 0
    },
@@ -863,8 +578,8 @@
     "id": "mem-16",
     "risk": "high",
     "family": "phishing_otp",
-    "latency_ms": 19221,
-    "cost_usd": 0.002519,
+    "latency_ms": 21396,
+    "cost_usd": 0.003278,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -875,10 +590,10 @@
    },
    {
     "id": "mem-17",
-    "risk": "medium",
-    "family": "investment",
-    "latency_ms": 16078,
-    "cost_usd": 0.002733,
+    "risk": "high",
+    "family": "impersonation",
+    "latency_ms": 15263,
+    "cost_usd": 0.002489,
     "escalated": false,
     "tool_hit": true,
     "models": {
@@ -890,9 +605,9 @@
    {
     "id": "mem-18",
     "risk": "high",
-    "family": "investment",
-    "latency_ms": 25604,
-    "cost_usd": 0.003184,
+    "family": "impersonation",
+    "latency_ms": 26040,
+    "cost_usd": 0.003433,
     "escalated": false,
     "tool_hit": true,
     "models": {
@@ -905,8 +620,8 @@
     "id": "mem-19",
     "risk": "high",
     "family": "mule",
-    "latency_ms": 13198,
-    "cost_usd": 0.00227,
+    "latency_ms": 15822,
+    "cost_usd": 0.002457,
     "escalated": false,
     "tool_hit": false,
     "models": {
@@ -919,14 +634,295 @@
     "id": "mem-20",
     "risk": "high",
     "family": "impersonation",
-    "latency_ms": 16350,
-    "cost_usd": 0.0044,
-    "escalated": true,
+    "latency_ms": 15549,
+    "cost_usd": 0.002516,
+    "escalated": false,
     "tool_hit": false,
     "models": {
      "fast": "nvidia/Nemotron-3_5-Lightning",
-     "plan": "nvidia/nemotron-3-super-120b-a12b",
-     "escalate": "nvidia/Nemotron-3-Ultra-550b-a55b"
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   }
+  ],
+  "plan_no_ledger": [
+   {
+    "id": "mem-01",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 15289,
+    "cost_usd": 0.002181,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-02",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 13845,
+    "cost_usd": 0.001814,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-03",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 20985,
+    "cost_usd": 0.002662,
+    "escalated": false,
+    "tool_hit": true,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-04",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 23117,
+    "cost_usd": 0.00252,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-05",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 15852,
+    "cost_usd": 0.002208,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-06",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 20056,
+    "cost_usd": 0.00212,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-07",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 16050,
+    "cost_usd": 0.00181,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-08",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 15467,
+    "cost_usd": 0.002275,
+    "escalated": false,
+    "tool_hit": true,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-09",
+    "risk": "low",
+    "family": "legit",
+    "latency_ms": 14251,
+    "cost_usd": 0.001978,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-10",
+    "risk": "low",
+    "family": "mule",
+    "latency_ms": 20126,
+    "cost_usd": 0.002555,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-11",
+    "risk": "medium",
+    "family": "love",
+    "latency_ms": 16109,
+    "cost_usd": 0.002429,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-12",
+    "risk": "medium",
+    "family": "impersonation",
+    "latency_ms": 17804,
+    "cost_usd": 0.002705,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-13",
+    "risk": "high",
+    "family": "mule",
+    "latency_ms": 16146,
+    "cost_usd": 0.002748,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-14",
+    "risk": "medium",
+    "family": "investment",
+    "latency_ms": 22190,
+    "cost_usd": 0.003155,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-15",
+    "risk": "medium",
+    "family": "impersonation",
+    "latency_ms": 15886,
+    "cost_usd": 0.002664,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-16",
+    "risk": "high",
+    "family": "phishing_otp",
+    "latency_ms": 13832,
+    "cost_usd": 0.002383,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-17",
+    "risk": "medium",
+    "family": "investment",
+    "latency_ms": 13287,
+    "cost_usd": 0.002487,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-18",
+    "risk": "medium",
+    "family": "investment",
+    "latency_ms": 17932,
+    "cost_usd": 0.002531,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-19",
+    "risk": "high",
+    "family": "mule",
+    "latency_ms": 21009,
+    "cost_usd": 0.003103,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
+    },
+    "tool_errors": 0
+   },
+   {
+    "id": "mem-20",
+    "risk": "medium",
+    "family": "impersonation",
+    "latency_ms": 16526,
+    "cost_usd": 0.002325,
+    "escalated": false,
+    "tool_hit": false,
+    "models": {
+     "fast": "nvidia/Nemotron-3_5-Lightning",
+     "plan": "nvidia/nemotron-3-super-120b-a12b"
     },
     "tool_errors": 0
    }

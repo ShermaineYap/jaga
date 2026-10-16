@@ -17,9 +17,9 @@ import matplotlib.pyplot as plt  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "eval" / "results"
 INK, MUTED, LINE = "#1f1a14", "#6b6257", "#e8dfd2"
-PALETTE = {"rules": "#9a9188", "fast": "#5b8def", "plan": "#0f6e56", "full": "#5f8f80", "no_tavily": "#c9a46a", "no_ledger": "#c98b86"}
-LABELS = {"rules": "keyword\nrules", "fast": "Lightning\nonly", "plan": "DEFAULT\nLightning\n+ Super", "full": "default\n+ Ultra",
-          "no_tavily": "+ Ultra\n− Tavily", "no_ledger": "+ Ultra\n− memory"}
+PALETTE = {"rules": "#9a9188", "fast": "#5b8def", "plan": "#0f6e56", "full": "#5f8f80", "plan_no_ledger": "#7fb3a3", "no_tavily": "#c9a46a", "no_ledger": "#c98b86"}
+LABELS = {"rules": "keyword\nrules", "fast": "Lightning\nonly", "plan": "DEFAULT\nLightning\n+ Super", "plan_no_ledger": "default\n− memory",
+          "full": "+ Ultra\n(earlier\nbuild)", "no_tavily": "+ Ultra\n− Tavily\n(earlier)", "no_ledger": "+ Ultra\n− memory"}
 
 
 def style(ax):

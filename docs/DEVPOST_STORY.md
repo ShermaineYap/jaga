@@ -20,7 +20,7 @@ A senior (or their adult child) forwards a suspicious message **or screenshot** 
 - **Nebius Token Factory** serves four NVIDIA Nemotron models through one OpenAI-compatible client: **3.5 Lightning** (triage), **3 Super** (planning + verdict), **3.5 Super VL** (screenshots), **3 Ultra** (optional second opinion). Every call uses JSON-schema structured output and `chat_template_kwargs.enable_thinking`, with fallback chains and cost accounting.
 - **Tavily** search with `include_domains` + `include_raw_content`, news search, extract, and a nightly map→extract cache of the alert lists; a 24-hour response cache keeps credits low.
 - **NVIDIA OpenShell 0.1.4:** Jaga's pipeline ran inside an OpenShell sandbox with a **default-deny egress policy** (only Token Factory, Tavily, Telegram). The Nebius and Tavily keys stay in the gateway — inside the sandbox they are `openshell:resolve:env:…` placeholders, `example.com` is refused, and the OCSF log shows each allowed call matched to its provider policy.
-- Python, FastAPI dashboard, SQLite ledger, Telegram Bot API, deployed on Render; 11 tests; Playwright for the demo recordings.
+- Python, FastAPI dashboard, SQLite ledger, Telegram Bot API, deployed on Render; 14 tests; Playwright for the demo recordings.
 
 ## Results
 
@@ -29,20 +29,21 @@ A senior (or their adult child) forwards a suspicious message **or screenshot** 
 | | F1 | Scams caught | False alarms | USD / 1k msgs |
 |---|---|---|---|---|
 | Keyword rules | 0.763 | 76.0% | 23.3% | — |
-| Lightning only | 0.892 | 98.7% | 22.7% | $0.18 |
-| **Lightning + Super + Tavily + memory (default)** | **0.946** | **98.7%** | **10.0%** | **$2.18** |
-| … + Ultra second opinion | 0.936 | 97.3% | 10.7% | $2.51 |
+| Lightning only | 0.887 | 99.3% | 24.7% | $0.18 |
+| **Lightning + Super + Tavily + memory (default)** | **0.939** | **98.0%** | **10.7%** | **$2.20** |
+| Default without memory | 0.940 | 98.7% | 11.3% | $2.10 |
 
-Super's planning and verdict **halve false alarms** versus Lightning alone (significant on a paired bootstrap). Ultra added no measurable accuracy at +15% cost, so it's opt-in.
+Super's planning and verdict **cut false alarms by more than half** versus Lightning alone (significant on a paired bootstrap). A Nemotron 3 Ultra second opinion added no measurable accuracy at +15% cost, so it's opt-in.
 
-**Memory test** (10 genuine messages from saved contacts + 10 impersonations of the same people from new numbers): with memory, **10/10 impersonations caught and 0/10 genuine messages flagged**; without memory, 3/10 genuine messages were flagged.
+**Memory test** (10 genuine messages from saved contacts + 10 impersonations of the same people from new numbers, run 3×): with memory, **30/30 impersonations caught and 0/30 genuine messages flagged**; without memory, 4/30 genuine messages were flagged; Lightning alone, 6/30.
 
 ## Challenges I ran into
 
 Live testing found bugs a demo would have hidden — each is now fixed in code and most have a test:
 - Nemotron's guided decoding **silently skipped optional schema fields**, so triage returned no entities and nothing got verified. Fix: every field `required`, lists bounded.
 - The verdict model once **cited a real Bank Negara page for a phone number that isn't on it**. Fix: web evidence is rebuilt only from deterministic tool hits.
-- Memory originally trusted a contact's **name**, which cleared "Mum, it's Siti, new number". Fix: trust only the saved number; a saved name from a new number is a red flag.
+- Memory originally trusted a contact's **name**, which cleared "Mum, it's Siti, new number". Fix: trust only the saved number; a saved name from a new number asking for money is always high risk.
+- On the deployed demo, the planner "verified" the generic word *phone* against an unrelated SC page and the headline claimed the number was on a scam list. Fix: only concrete extracted entities are verified, and headlines can't claim a list match without one.
 - Nemotron 3 Nano Omni left serverless on 31 Aug, but Nemotron 3.5 Super VL arrived — screenshots made it in; voice notes didn't (no speech model on Token Factory yet).
 
 ## Accomplishments that I'm proud of
@@ -51,7 +52,7 @@ A complete loop a senior can use with zero setup; citations that are verified, n
 
 ## What I learned
 
-Verification beats classification for trust. Putting a stronger model on the judgment step halved false alarms compared with the cheap model alone, at a cost a household would never notice — and the bigger model on top (Ultra) added nothing measurable. You only know these things if you measure them. And "the model will cite its sources" is not a safety property until code checks the source.
+Verification beats classification for trust. Putting a stronger model on the judgment step cut false alarms by more than half compared with the cheap model alone, at a cost a household would never notice — and the bigger model on top (Ultra) added nothing measurable. You only know these things if you measure them. And "the model will cite its sources" is not a safety property until code checks the source.
 
 ## What's next for Jaga
 
