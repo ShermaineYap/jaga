@@ -70,9 +70,9 @@ class Verdict(BaseModel):
     family: ScamFamily
     headline_ms: str = Field(description="One sentence in Bahasa Malaysia for the senior")
     headline_en: str = Field(description="One sentence in English for the family")
-    explanation: str = Field(description="2-4 sentences, plain language, cites evidence by number")
+    explanation: str = Field(max_length=700, description="2-4 sentences, plain language, cites evidence by number")
     evidence: list[Evidence] = Field(default_factory=list)
-    recommended_action: str = Field(description="Concrete next step, e.g. 'Do not transfer. Call NSRC 997.'")
+    recommended_action: str = Field(max_length=300, description="One or two concrete steps, e.g. 'Do not transfer. Call NSRC 997.'")
     notify_family: bool
     escalate: bool = Field(description="True if high value + ambiguous evidence: send to the escalation tier")
     novelty_flags: list[str] = Field(default_factory=list, description="e.g. 'payee never seen before'")
@@ -82,8 +82,8 @@ class EscalationOpinion(BaseModel):
     """Second opinion from Nemotron 3 Ultra on hard cases."""
     agree_with_verdict: bool
     risk: Risk
-    reasoning_summary: str
-    additional_action: str
+    reasoning_summary: str = Field(max_length=400, description="At most two short sentences")
+    additional_action: str = Field(max_length=200)
 
 
 class CaseResult(BaseModel):

@@ -35,11 +35,20 @@ def _backstop_entities(triage: Triage, text: str) -> None:
     regex are always added, so a missed extraction can never silently skip verification."""
     from .mock import ACCT_RE, PHONE_RE, URL_RE
     e = triage.entities
-    for found, bucket in ((PHONE_RE.findall(text), e.phones), (URL_RE.findall(text), e.urls)):
-        norm = {x.replace(" ", "").replace("-", "") for x in bucket}
-        for f in found:
-            if f.replace(" ", "").replace("-", "") not in norm and len(bucket) < 5:
-                bucket.append(f.strip())
+    from .ledger import _norm_phone
+    seen_ph = {_norm_phone(x) for x in e.phones}
+    for f in PHONE_RE.findall(text):
+        if _norm_phone(f) not in seen_ph and len(e.phones) < 5:
+            e.phones.append(f.strip()); seen_ph.add(_norm_phone(f))
+    deduped, seen = [], set()
+    for x in e.phones:
+        if _norm_phone(x) not in seen:
+            deduped.append(x); seen.add(_norm_phone(x))
+    e.phones[:] = deduped
+    norm_u = {x.lower().rstrip("/") for x in e.urls}
+    for f in URL_RE.findall(text):
+        if f.lower().rstrip("/") not in norm_u and not any(f.lower() in u.lower() for u in e.urls) and len(e.urls) < 5:
+            e.urls.append(f.strip()); norm_u.add(f.lower().rstrip("/"))
     for a in ACCT_RE.findall(text):
         if a not in e.bank_accounts and a.replace(" ", "") not in "".join(e.phones).replace(" ", "").replace("-", "") and len(e.bank_accounts) < 4:
             e.bank_accounts.append(a)
@@ -64,21 +73,22 @@ def _plan_floor(plan: VerificationPlan, triage: Triage) -> None:
 def _enforce_policy(verdict: Verdict, ledger_ctx: dict, tool_results: list[dict]) -> None:
     """Rules that must hold whatever the model wrote. Enforced in code, not by prompt."""
     from .schemas import Evidence
-    # 1. Evidence may only cite URLs that a tool actually returned (no invented sources).
-    real_urls = {r.get("url") for r in tool_results if r.get("url")}
-    for r in tool_results:
-        for x in r.get("results", []):
-            real_urls.add(x.get("url"))
-    verdict.evidence = [e for e in verdict.evidence if not e.source_url or e.source_url in real_urls]
+    # 1. Web evidence comes ONLY from verified tool hits (the entity was found on that page by a
+    #    deterministic check). The model's own wording about web sources is discarded, because a
+    #    real URL with a misattributed claim is worse than no citation. Model-written ledger
+    #    evidence is kept.
+    verdict.evidence = [e for e in verdict.evidence if e.kind == "ledger"]
     # 2. Household memory that cleared a case is always shown.
     if ledger_ctx.get("trusted_matches") and not any(e.kind == "ledger" for e in verdict.evidence):
         verdict.evidence.insert(0, Evidence(claim=f"Sender matches a trusted household contact: {ledger_ctx['trusted_matches'][0]}",
                                             source_url="", quote="", kind="ledger"))
-    # 3. Official hits found by tools are always cited, even if the model forgot.
-    cited = {e.source_url for e in verdict.evidence}
+    # 3. Every verified hit is cited once, with the exact sentence from the page.
+    seen = set()
     for r in tool_results:
-        if r.get("hit") and r.get("url") and r["url"] not in cited and r.get("kind") != "ledger":
-            verdict.evidence.append(Evidence(claim=r["claim"], source_url=r["url"], quote=r.get("quote", "")[:240],
+        if r.get("hit") and r.get("url") and r.get("kind") != "ledger" and (r["url"], r["entity"]) not in seen:
+            seen.add((r["url"], r["entity"]))
+            verdict.evidence.append(Evidence(claim=r["claim"], source_url=r["url"],
+                                             quote=r.get("quote", "").strip(' "\'')[:240],
                                              kind="official_alert" if r.get("kind") == "official_alert" else "news"))
     # 4. No blank claims; "none found" only when there is nothing else.
     verdict.evidence = [e for e in verdict.evidence if e.claim.strip()]
@@ -150,7 +160,8 @@ class Jaga:
                 for chk in plan.checks[: config.MAX_TOOL_ROUNDS * 2]:
                     chk.query = _re.sub(r"\s+", " ", chk.query).strip().strip('"')[:200] or chk.entity
                     chk.entity = _re.sub(r"\s+", " ", chk.entity).strip()[:120]
-                    checks.append(chk)
+                    if chk.entity and chk.query and len(chk.query) >= 3:
+                        checks.append(chk)
 
                 def _run(chk):
                     if chk.tool == "ledger_lookup":
@@ -163,7 +174,8 @@ class Jaga:
                     try:
                         return self.tavily.run_check(chk.tool, chk.query, chk.entity)
                     except Exception as e:  # noqa: BLE001  (one failed search never sinks the case)
-                        return {"tool": chk.tool, "query": chk.query, "entity": chk.entity, "hit": False, "url": "",
+                        log.warning("tool %s failed for %r: %s", chk.tool, chk.entity, e)
+                        return {"error": True, "tool": chk.tool, "query": chk.query, "entity": chk.entity, "hit": False, "url": "",
                                 "kind": "none_found", "quote": "", "claim": f"search failed: {str(e)[:80]}", "results": []}
 
                 with ThreadPoolExecutor(max_workers=6) as ex:
@@ -172,11 +184,16 @@ class Jaga:
                             continue
                         tool_results.append(res)
                         if res["tool"] != "ledger_lookup":
-                            self.ledger.audit(opts.household_id, "tool.call", res["tool"], outcome="hit" if res["hit"] else "none",
+                            self.ledger.audit(opts.household_id, "tool.call", res["tool"],
+                                              outcome="error" if res.get("error") else ("hit" if res["hit"] else "none"),
                                               detail={"query": res["query"], "entity": res["entity"], "url": res["url"]})
 
         # 5. Verdict
-        slim_results = [{k: v for k, v in r.items() if k != "results"} | {"top_results": r.get("results", [])[:2]}
+        # The verdict model sees verified facts only: for a hit, the matched page and sentence;
+        # for a miss, just "no alert found". Unrelated search results are not shown, so the model
+        # cannot attribute an entity to a page that does not mention it.
+        slim_results = [{"tool": r["tool"], "entity": r["entity"], "verified_hit": bool(r.get("hit")),
+                         "page": r.get("url", ""), "matched_sentence": r.get("quote", ""), "summary": r.get("claim", "")}
                         for r in tool_results]
         verdict: Verdict = self.tf.structured(
             "fast" if opts.tier == "fast" else "plan", VERDICT_SYSTEM, VERDICT_USER.format(
@@ -186,8 +203,8 @@ class Jaga:
                 ledger_json=json.dumps(ledger_ctx, indent=1)),
             Verdict, thinking=opts.tier != "fast", budget=config.PLAN_REASONING_BUDGET, usage=usage,
             context={"triage": triage, "ledger": ledger_ctx, "tool_results": tool_results})
-        if not opts.use_ledger:
-            verdict.novelty_flags = []
+        # Memory flags shown to the family come from the ledger (code), never from model text.
+        verdict.novelty_flags = list(ledger_ctx.get("novelty_flags", [])) if opts.use_ledger else []
         _enforce_policy(verdict, ledger_ctx, tool_results)
 
         # 6. Escalation

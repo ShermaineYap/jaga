@@ -49,9 +49,12 @@ CREATE TABLE IF NOT EXISTS audit (
 
 
 def _norm_phone(p: str) -> str:
+    """Canonical Malaysian form: +60 11-0000 4471, 6011..., 11-0000 4471 → 01100004471."""
     d = re.sub(r"\D", "", p)
     if d.startswith("60"):
         d = "0" + d[2:]
+    elif d.startswith("1") and 9 <= len(d) <= 10:
+        d = "0" + d
     return d
 
 
@@ -159,6 +162,7 @@ class Ledger:
                 if o.lower() not in known_orgs:
                     flags.append(f"{o} is not a known household relationship")
         recent = self.recent_cases(household_id, limit=5)
+        flags = list(dict.fromkeys(flags))
         return {"trusted_matches": trusted, "novelty_flags": flags[:5],
                 "recent_families": [r["family"] for r in recent],
                 "contacts_known": len(contacts), "payees_known": len(payees)}

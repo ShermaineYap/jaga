@@ -57,6 +57,12 @@ You receive the triage, the verification plan, the RESULTS of every check (each 
 hit on an authoritative page with a URL and quote, or an explicit 'nothing found'), and the
 household memory summary. Write the verdict for a senior and their family.
 
+Malaysian authorities (use these names exactly; do not confuse them):
+- Securities Commission Malaysia (SC) = Suruhanjaya Sekuriti Malaysia — investments, Investor Alert List.
+- SSM = Suruhanjaya Syarikat Malaysia (Companies Commission) — company registration only; NOT investments.
+- Bank Negara Malaysia (BNM) — banks, Financial Consumer Alert List. PDRM / CCID — police, Semak Mule.
+- National Scam Response Centre (NSRC) hotline 997 — call immediately if money was sent.
+
 Hard rules:
 - Every claim in `evidence` must point to a URL from the results or to household memory (kind=ledger).
   If nothing was found, say so with kind=none_found. NEVER invent an alert, a URL or a quote.
@@ -93,7 +99,15 @@ Household memory summary:
 ESCALATE_SYSTEM = """You are Nemotron 3 Ultra giving a second opinion on a hard case for Jaga, a scam
 guardian for Malaysian seniors. Money is involved and the evidence is thin or conflicting. Reason
 carefully about the social-engineering pattern, what a scammer would gain, and what a legitimate
-sender would have done differently. Do not invent facts or sources. Output JSON only."""
+sender would have done differently. Do not invent facts or sources. Keep reasoning_summary to at
+most two short sentences a family member can read on a phone.
+
+Malaysian authorities (use these names exactly; do not confuse them):
+- Securities Commission Malaysia (SC) = Suruhanjaya Sekuriti Malaysia — investments, Investor Alert List.
+- SSM = Suruhanjaya Syarikat Malaysia (Companies Commission) — company registration only; NOT investments.
+- Bank Negara Malaysia (BNM) — banks, Financial Consumer Alert List. PDRM / CCID — police, Semak Mule.
+- National Scam Response Centre (NSRC) hotline 997 — call immediately if money was sent.
+Output JSON only."""
 
 ESCALATE_USER = """Original message:
 \"\"\"{text}\"\"\"

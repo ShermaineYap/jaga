@@ -34,11 +34,12 @@ class Tavily:
 
     # --------------------------------------------------------------- cache db
     def _init_cache(self) -> None:
-        with sqlite3.connect(self.db_path, timeout=30) as con:
-            con.execute("""CREATE TABLE IF NOT EXISTS alert_cache (
-                url TEXT PRIMARY KEY, title TEXT, content TEXT, fetched_at REAL)""")
-            con.execute("""CREATE TABLE IF NOT EXISTS search_cache (
-                key TEXT PRIMARY KEY, response TEXT, fetched_at REAL)""")
+        for db in {self.db_path, self.cache_db}:
+            with sqlite3.connect(db, timeout=30) as con:
+                con.execute("""CREATE TABLE IF NOT EXISTS alert_cache (
+                    url TEXT PRIMARY KEY, title TEXT, content TEXT, fetched_at REAL)""")
+                con.execute("""CREATE TABLE IF NOT EXISTS search_cache (
+                    key TEXT PRIMARY KEY, response TEXT, fetched_at REAL)""")
 
     def cache_lookup(self, term: str) -> list[dict[str, Any]]:
         term_l = term.lower().strip()

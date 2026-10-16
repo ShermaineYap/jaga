@@ -127,6 +127,7 @@ def metrics(rows: list[dict], preds: list[dict]) -> dict:
         "cost_usd_per_1000": round(cost / max(1, len(rows)) * 1000, 2),
         "escalations": sum(1 for p in preds if p.get("escalated")),
         "tool_hits": sum(1 for p in preds if p.get("tool_hit")),
+        "tool_errors": sum(p.get("tool_errors", 0) for p in preds),
     }
 
 
@@ -148,11 +149,14 @@ def run_config(name: str, rows: list[dict], force_mock: bool) -> tuple[dict, lis
         opts = RunOptions(tier=cfg["tier"], use_tavily=cfg["use_tavily"], use_ledger=cfg["use_ledger"], household_id=hh, notify=False)
         for attempt in range(3):
             try:
+                t_case = time.time()
                 res = jaga.run_case(r["text"], opts, channel=r.get("channel", "whatsapp"))
                 out = {"id": r["id"], "risk": res.verdict.risk, "family": res.verdict.family, "latency_ms": res.latency_ms,
                        "cost_usd": res.cost_usd, "escalated": res.escalation is not None,
                        "tool_hit": any(e.kind in ("official_alert", "news") and e.source_url for e in res.verdict.evidence),
-                       "models": res.models_used}
+                       "models": res.models_used,
+                       "tool_errors": sum(1 for e in jaga.ledger.audit_events(hh, 60)
+                                          if e["activity"] == "tool.call" and e["outcome"] == "error" and e["ts"] >= t_case)}
                 break
             except Exception as e:  # noqa: BLE001
                 out = {"id": r["id"], "risk": "unknown", "family": "legit", "latency_ms": 0, "cost_usd": 0.0, "error": str(e)[:300]}

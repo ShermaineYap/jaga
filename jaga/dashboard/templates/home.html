@@ -29,4 +29,19 @@
   <div class="muted" style="font-size:14px;margin-top:6px">“{{ c.text[:140] }}{% if c.text|length > 140 %}…{% endif %}”</div>
 </div></a>
 {% endfor %}
+<div id="checking" style="display:none;position:fixed;inset:0;background:rgba(251,247,240,.94);z-index:9;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px">
+  <div style="font-size:44px">🛡️</div>
+  <div class="big" id="step">Membaca mesej… / Reading the message…</div>
+  <div class="muted" style="max-width:520px;margin-top:8px">Nemotron on Nebius Token Factory → checking official alert lists (SC · PDRM · BNM · MCMC) with Tavily → household memory</div>
+</div>
+<script>
+(function(){
+  const steps=["Membaca mesej… / Reading the message…","Merancang semakan… / Planning what to verify…",
+               "Menyemak senarai amaran rasmi… / Checking official alert lists…","Menulis keputusan… / Writing the verdict…"];
+  document.querySelectorAll('form[action="/check"],form[action="/check-image"]').forEach(f=>f.addEventListener('submit',()=>{
+    const o=document.getElementById('checking'); o.style.display='flex'; let i=0;
+    setInterval(()=>{ i=Math.min(i+1,steps.length-1); document.getElementById('step').textContent=steps[i]; }, 4500);
+  }));
+})();
+</script>
 {% endblock %}

@@ -91,3 +91,22 @@ def test_export_and_delete():
 def test_triage_schema_is_valid_json_schema():
     s = Triage.model_json_schema()
     assert "family" in s["properties"]
+
+
+def test_misattributed_web_evidence_is_dropped():
+    """A model claim citing a real URL for an entity that page does not contain must not survive."""
+    from jaga.pipeline import _enforce_policy
+    from jaga.schemas import Evidence, Verdict
+    v = Verdict(risk="high", family="investment", headline_ms="x", headline_en="x", explanation="x",
+                evidence=[Evidence(claim="011-9999 0123 appears in BNM list", source_url="https://bnm.gov.my/x",
+                                   quote="", kind="official_alert")],
+                recommended_action="Do not pay.", notify_family=True, escalate=False)
+    results = [{"tool": "tavily_search_official", "entity": "011-9999 0123", "hit": False, "url": "", "kind": "none_found",
+                "claim": "No alert", "quote": "", "results": [{"url": "https://bnm.gov.my/x"}]},
+               {"tool": "tavily_search_official", "entity": "RRJ Pro", "hit": True, "url": "https://sc.com.my/a",
+                "kind": "official_alert", "claim": "'RRJ Pro' appears in SC list", "quote": "1. Potential Clone Entity - RRJ Pro"}]
+    _enforce_policy(v, {"trusted_matches": []}, results)
+    urls = [e.source_url for e in v.evidence]
+    assert "https://bnm.gov.my/x" not in urls
+    assert "https://sc.com.my/a" in urls
+    assert "997" in v.recommended_action
