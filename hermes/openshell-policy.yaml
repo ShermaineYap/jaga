@@ -1,45 +1,47 @@
-# NVIDIA OpenShell sandbox policy for Jaga.
-# Default-deny: the agent process can reach exactly three hosts. API keys are
-# never inside the sandbox — OpenShell's inference routing injects them at the
-# gateway, so a prompt-injected message cannot exfiltrate credentials.
+# NVIDIA OpenShell sandbox policy for Jaga — REAL schema (OpenShell 0.1.4,
+# docs/how-it-works/policies/schema.mdx). Validated by a running gateway on
+# 2026-10-16; see hermes/OPENSHELL_RUN.md for the exact run and evidence.
 #
-# Apply:  openshell policy apply hermes/openshell-policy.yaml --sandbox jaga
-# (Check `openshell policy --help` for the exact subcommand on your version;
-#  the schema below follows the OpenShell 0.1.x docs — adjust field names if
-#  your version differs and note it in FEEDBACK.md.)
-apiVersion: openshell.nvidia.com/v1
-kind: SandboxPolicy
-metadata:
-  name: jaga
-spec:
-  network:
-    defaultAction: deny
-    egress:
-      - host: api.tokenfactory.nebius.com   # NVIDIA Nemotron inference on Nebius Token Factory
-        ports: [443]
-        purpose: inference
-      - host: api.tavily.com                # verification against official alert lists
-        ports: [443]
-        purpose: tool
-      - host: api.telegram.org              # senior + guardian messaging
-        ports: [443]
-        purpose: gateway
-  inference:
-    # Hermes talks to https://inference.local/v1; OpenShell forwards to Token
-    # Factory and attaches the key. The sandbox never holds NEBIUS_API_KEY.
-    provider: openai-compatible
-    baseURL: https://api.tokenfactory.nebius.com/v1
-    credentialRef: nebius-token-factory
-    allowedModels:
-      - nvidia/Nemotron-3_5-Lightning
-      - nvidia/nemotron-3-super-120b-a12b
-      - nvidia/Nemotron-3-Ultra-550b-a55b
-  filesystem:
-    readOnly: true
-    writable:
-      - /data            # jaga.sqlite3 (household ledger) — the only persistent state
-      - /home/agent/.hermes
-  audit:
-    format: ocsf
-    export: /data/audit/openshell-ocsf.jsonl
-    events: [network, process, inference, filesystem]
+# Default-deny: any (binary, host:port) pair not listed below is refused by
+# the sandbox's egress proxy. There is no "defaultAction" key — deny is
+# implicit. Unknown keys are a hard error.
+#
+# With the CLI:  openshell sandbox create --from jaga-sandbox:local \
+#                  --policy hermes/openshell-policy.yaml -- <cmd>
+# Without the CLI (what we did): hermes/openshell_run.py loads this file and
+# maps it onto the SandboxPolicy protobuf for the Python SDK.
+version: 1
+
+filesystem_policy:
+  include_workdir: true          # /sandbox
+  read_only: [/usr, /lib, /lib64, /etc, /opt, /bin, /sbin, /proc, /dev/urandom]
+  read_write: [/sandbox, /data, /tmp, /dev/null]   # /data holds jaga.sqlite3
+
+landlock:
+  compatibility: best_effort
+
+process:
+  run_as_user: "1500"
+  run_as_group: "1500"
+
+network_policies:
+  nebius_token_factory:          # NVIDIA Nemotron inference on Nebius Token Factory
+    endpoints:
+      - host: api.tokenfactory.nebius.com
+        port: 443
+        tls: skip
+    binaries: &jaga_bins
+      - path: /usr/bin/python3.12
+      - path: /usr/bin/curl      # only for the smoke test in OPENSHELL_RUN.md
+  tavily:                        # verification against official alert lists
+    endpoints:
+      - host: api.tavily.com
+        port: 443
+        tls: skip
+    binaries: *jaga_bins
+  telegram:                      # senior + guardian messaging
+    endpoints:
+      - host: api.telegram.org
+        port: 443
+        tls: skip
+    binaries: *jaga_bins
