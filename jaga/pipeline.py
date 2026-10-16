@@ -113,6 +113,9 @@ def _enforce_policy(verdict: Verdict, ledger_ctx: dict, tool_results: list[dict]
         verdict.headline_ms = defaults[verdict.risk][0]
     if not verdict.headline_en.strip():
         verdict.headline_en = defaults[verdict.risk][1]
+    # A message we flag cannot also be labelled "legit".
+    if verdict.risk in ("high", "medium") and verdict.family == "legit":
+        verdict.family = "impersonation"
     verdict.notify_family = verdict.risk in ("high", "medium")
 
 

@@ -33,6 +33,9 @@ def main() -> None:
         j.ledger.add_member(hh, "Siti (daughter)", "guardian", "", "summary")
     if not any(c["name"] == "Encik Faizal" for c in j.ledger.contacts(hh)):
         j.ledger.add_contact(hh, "Encik Faizal", "012-345 6789", "Prudential", "insurance agent", trusted=True, added_by="Siti")
+    if not any(c["name"] == "Siti" for c in j.ledger.contacts(hh)):
+        # Try: "Mak, Siti ni. Nombor baru 011-9999 0461, tolong transfer RM900 ke akaun 5566778899001"
+        j.ledger.add_contact(hh, "Siti", "013-222 3344", "", "daughter", trusted=True, added_by="Siti")
     for ch, text in DEMO_MESSAGES:
         r = j.run_case(text, RunOptions(household_id=hh, notify=False), channel=ch)
         print(f"[{r.verdict.risk:7s}] {r.verdict.family:13s} {r.verdict.headline_en}  (${r.cost_usd:.4f}, {r.latency_ms} ms)")
